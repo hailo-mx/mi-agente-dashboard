@@ -1,0 +1,10 @@
+node_modules/
+.next/
+out/
+# Tus datos locales (tareas, correos, etc.). No se suben a GitHub.
+datos/
+.env*
+.vercel
+next-env.d.ts
+*.tsbuildinfo
+.DS_Store
