@@ -24,6 +24,8 @@ const ICONOS: Record<string, string> = {
   SonidoOn: 'M4 10v4h3l5 4V6L7 10zm12-1a4 4 0 010 6m2.5-9a8 8 0 010 12',
   SonidoOff: 'M4 10v4h3l5 4V6L7 10zm12 0l5 5m0-5l-5 5',
   Enviar: 'M5 12l14-7-5 14-3-6z',
+  Llamar: 'M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z',
+  Escuchar: 'M8 5v14l11-7z',
 };
 
 export function Icono({ nombre, lado = 18 }: { nombre: string; lado?: number }) {
@@ -63,9 +65,19 @@ export function Vacio({ children }: { children: ReactNode }) {
 }
 
 let audio: AudioContext | null = null;
+let desbloqueado = false;
+// Un WAV de un cuadro en silencio. En iPhone, reproducir un <audio> dentro del toque pasa el sonido
+// a la categoría «reproducción»: así el clic se oye aunque el interruptor de silencio esté puesto.
+const SILENCIO = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA=';
+
 /* Clic corto. En el teléfono el audio arranca dormido: hay que despertarlo dentro del toque. */
 export function clic() {
   try {
+    if (!desbloqueado) {
+      desbloqueado = true;
+      const a = new Audio(SILENCIO);
+      a.play().catch(() => undefined);
+    }
     const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     audio ??= new Ctx();
     const ctx = audio;
@@ -83,7 +95,8 @@ export function clic() {
       o.start(t);
       o.stop(t + 0.1);
     };
-    if (ctx.state === 'suspended') ctx.resume().then(sonar);
+    // «suspended» al crearlo fuera de un toque; «interrupted» (iOS) al volver de segundo plano o de una llamada.
+    if (ctx.state !== 'running') ctx.resume().then(sonar, () => undefined);
     else sonar();
   } catch {
     /* sin audio: no pasa nada */

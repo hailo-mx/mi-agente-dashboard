@@ -363,6 +363,12 @@ textarea.mt-campo.sin-linea { border-bottom: 0; }
 .mt-fondo-muestra { height: 54px; border-radius: 14px; border: 2px solid transparent; }
 .mt-fondo-muestra.on { border-color: #fff; }
 .mt-logo-muestra { width: 36px; height: 36px; border-radius: 999px; object-fit: cover; }
+.mt-icono-muestra { width: 44px; height: 44px; border-radius: 11px; object-fit: cover; }
+.mt-imagenes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 40px; }
+.mt-imagenes .mt-etiqueta { margin-top: 0; }
+.mt-escuchar { display: inline-flex; align-items: center; gap: 6px; }
+.mt-llamar { gap: 6px; text-decoration: none; }
+.mt-pista { margin-top: 10px; }
 .mt-grupo { margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.08); }
 .mt-grupo .mt-campo { margin-top: 4px; }
 .mt-grupo .mt-etiqueta { display: block; margin-top: 16px; }
@@ -444,7 +450,7 @@ textarea.mt-campo.sin-linea { border-bottom: 0; }
   .mt-quien { display: none; }
   .mt-app .mt-chat { border: 0; background: transparent; padding: 4px 0 0; min-height: 100%; }
   .mt-atras { display: block; }
-  .mt-personalizar { grid-template-columns: minmax(0, 1fr); }
+  .mt-personalizar, .mt-imagenes { grid-template-columns: minmax(0, 1fr); }
   .mt-tabs {
     display: grid;
     flex: none;

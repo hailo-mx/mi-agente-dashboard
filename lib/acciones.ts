@@ -3,7 +3,7 @@ import { randomBytes } from 'crypto';
 import { almacen } from './almacen';
 import { NOMBRE } from './marca';
 import { VOCES } from './tema';
-import { CANALES, ESTADOS, FONDOS, type Ajustes, type Aprobacion, type Canal, type Correo, type Estado, type Evento, type Rutina, type Tarea } from './tipos';
+import { AGENTES, CANALES, ESTADOS, FONDOS, type Ajustes, type Aprobacion, type Canal, type Correo, type Estado, type Evento, type Rutina, type Tarea } from './tipos';
 
 /** Un dato que llegó mal. Su mensaje se le muestra tal cual a quien lo mandó. */
 export class ErrorDeDatos extends Error {}
@@ -235,11 +235,14 @@ export async function guardarEventos(e: Entrada): Promise<Evento[]> {
 
 // ── ajustes ──
 
+/** Guarda los ajustes completos (lo manda la pantalla). La foto y el ícono se suben por /api/foto y /api/icono: aquí se conservan los guardados. */
 export async function guardarAjustes(e: Entrada): Promise<Ajustes> {
   const color = texto(e, 'color', 7);
   if (!/^#[0-9a-fA-F]{6}$/.test(color)) throw new ErrorDeDatos('El color debe tener el formato #rrggbb.');
   const logo = textoOpcional(e, 'logo', MAX_LOGO);
   if (logo && !logo.startsWith('data:image/')) throw new ErrorDeDatos('El logo debe ser una imagen.');
+  const a = almacen();
+  const { foto, icono } = await a.leerAjustes();
   const ajustes: Ajustes = compacto({
     nombreApp: textoOpcional(e, 'nombreApp', 40) ?? NOMBRE,
     tuNombre: textoOpcional(e, 'tuNombre', 40) ?? '',
@@ -248,7 +251,22 @@ export async function guardarAjustes(e: Entrada): Promise<Ajustes> {
     logo,
     sonido: booleano(e, 'sonido'),
     voz: e.voz === undefined ? 'Sol' : opcion(e, 'voz', VOCES),
+    agente: e.agente === undefined || e.agente === '' ? undefined : opcion(e, 'agente', AGENTES.filter(Boolean)),
+    foto,
+    icono,
   });
-  await almacen().guardarAjustes(ajustes);
+  await a.guardarAjustes(ajustes);
+  return ajustes;
+}
+
+/** Desde el agente: cambia solo los campos que mande (nombre, tuNombre, color, fondo, voz, sonido, agente). */
+export async function cambiarAjustes(e: Entrada): Promise<Ajustes> {
+  const actual = await almacen().leerAjustes();
+  const cambios: Entrada = {};
+  if (e.nombre !== undefined) cambios.nombreApp = e.nombre;
+  for (const campo of ['nombreApp', 'tuNombre', 'color', 'fondo', 'voz', 'sonido', 'agente']) if (e[campo] !== undefined) cambios[campo] = e[campo];
+  if (Object.keys(cambios).length === 0) throw new ErrorDeDatos('Manda al menos un campo: nombre, tuNombre, color, fondo, voz, sonido o agente.');
+  const ajustes = await guardarAjustes({ ...actual, ...cambios });
+  await anotarActividad(`Cambió los ajustes: ${Object.keys(cambios).map((c) => (c === 'nombreApp' ? 'nombre' : c)).join(', ')}`);
   return ajustes;
 }

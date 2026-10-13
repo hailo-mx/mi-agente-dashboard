@@ -38,6 +38,19 @@ export function navegadorAutorizado(): boolean {
   return Boolean(galleta) && iguales(galleta!, valorGalleta());
 }
 
+/** Para agentes que no pueden mandar encabezados (ChatGPT): la clave va en la ruta, /mcp/<CLAVE_AGENTE>. */
+export function claveEnRuta(segmento: string): boolean {
+  const real = clave();
+  if (!real) return true;
+  let intento = segmento;
+  try {
+    intento = decodeURIComponent(segmento);
+  } catch {
+    /* se compara tal cual */
+  }
+  return iguales(intento, real);
+}
+
 /** Para el agente: encabezado "Authorization: Bearer <CLAVE_AGENTE>". */
 export function agenteAutorizado(peticion: Request): boolean {
   const real = clave();

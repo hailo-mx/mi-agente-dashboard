@@ -18,8 +18,12 @@ Se puede **instalar como app** (PWA): en iPhone/iPad, Safari → Compartir → �
 - **Rutinas**: lo que tu agente hace solo y a qué hora; cada una se puede pausar.
 - **Aprobaciones**: lo que tu agente quiere mandar en tu nombre, con el texto exacto. Aprobar, Editar o rechazar (✕).
 - **Conexiones**: conectar Google, Microsoft 365 y WhatsApp Business.
-- **Ajustes**: tema, color, fondo, voz, logo y sonido; el nombre de la app y el tuyo; la dirección MCP para tu agente.
-- **Tu agente** (la columna de la derecha, o la pestaña «Agente» en el celular): tu agente vive en Dots, Grok Bot o Muse; aquí solo se ve lo último que hizo. No se le escribe desde el panel.
+- **Ajustes**: tema, color, fondo, en qué agente vives (Dots, Grok Bot o Muse), voz, logo y sonido; el nombre de la app y el tuyo; tu foto; el ícono de tu app; la dirección MCP para tu agente.
+- **Tu agente** (la columna de la derecha, o la pestaña «Agente» en el celular): tu agente vive en Dots, Grok Bot o Muse; aquí solo se ve lo último que hizo. No se le escribe desde el panel. Si elegiste Dots o Grok Bot, aparece el botón **Llamar**: abre la app de tu agente en otra pestaña y ahí tocas el ícono de voz (ninguna de las dos tiene una liga que abra la voz directo). Muse no tiene llamadas de voz.
+
+### Tu foto y el ícono de tu app
+
+En Ajustes puedes subir **tu foto** (se ve arriba, junto a tu nombre) y el **ícono de tu app** (el de la pestaña del navegador, el de la pantalla de inicio del teléfono y el del manifiesto para instalarla). Valen JPG, PNG o WebP de hasta 2 MB; el navegador las achica antes de subirlas. Si hay Vercel Blob, se guardan ahí como archivos privados; si no, dentro de tus datos. Con **Quitar** vuelve la inicial de tu nombre. Si ya tenías la app instalada en el teléfono, vuelve a instalarla para ver el ícono nuevo.
 
 Cuando todavía no hay nada, cada sección lo dice con una línea («Tu agente todavía no ha anotado nada», «Conecta tu correo en Conexiones…»). El panel nunca inventa datos de muestra.
 
@@ -67,6 +71,14 @@ En la configuración de tu agente (OpenAI Dots, xAI Grok Bot, Meta Muse o cualqu
 
 Si tu agente solo te deja poner la URL y una "API key" o "token", pon ahí la clave: casi siempre la manda como ese encabezado.
 
+### Si tu agente no deja poner la clave (ChatGPT y otros)
+
+Algunos conectores solo ofrecen «OAuth» o «sin autenticación» y no pueden mandar la clave como encabezado (por ejemplo, los plugins personales de ChatGPT en modo desarrollador). Para esos, la clave va dentro de la dirección:
+
+- **URL para conectar tu agente:** `https://TU-DIRECCION/mcp/TU-CLAVE` (sin autenticación)
+
+Es la misma clave `CLAVE_AGENTE`. Funciona igual que `/mcp`, solo que no hace falta el encabezado. Trátala como una contraseña: quien tenga esa dirección puede escribir en tu panel. Las dos direcciones contestan a `GET` con un JSON corto (`{"ok":true,"servidor":"mi-agente-dashboard"}`) para los conectores que prueban la dirección antes de usarla.
+
 Para probar que funciona, desde una terminal:
 
 ```bash
@@ -76,7 +88,13 @@ curl -X POST https://tu-panel.vercel.app/mcp \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 ```
 
-Debe regresar la lista de herramientas. Sin el encabezado de la clave, contesta `401`.
+Debe regresar la lista de herramientas. Sin el encabezado de la clave, contesta `401`. Con la clave en la dirección es igual, sin encabezado:
+
+```bash
+curl -X POST https://tu-panel.vercel.app/mcp/tu-clave-secreta \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+```
 
 ## Publicarlo en internet (Vercel)
 
@@ -146,7 +164,8 @@ Son las que aparecen en `tools/list` (están definidas en `lib/herramientas.ts`)
 - `registrar_actividad` — Escribe una línea en la actividad reciente del panel.
 - `guardar_correos` — Sustituye el resumen de tu bandeja de entrada por la lista que mande.
 - `guardar_eventos` — Sustituye los eventos del calendario dentro de un rango de fechas.
-- `leer_ajustes` — Devuelve el nombre del panel, tu nombre, el color, el fondo y la voz elegida, para que te hable por tu nombre.
+- `leer_ajustes` — Devuelve el nombre del panel, tu nombre, el color, el fondo, la voz elegida y en qué agente vives, para que te hable por tu nombre.
+- `guardar_ajustes` — Cambia solo los ajustes que mande: `nombre`, `tuNombre`, `color`, `fondo`, `voz`, `sonido` y `agente` (`dots`, `grok` o `muse`).
 - `listar_conexiones` — Dice qué cuentas tienes conectadas (Google, Microsoft 365, WhatsApp) y cuándo se sincronizaron.
 - `sincronizar_correo_y_calendario` — Trae a tu panel los últimos 20 hilos de tu bandeja y los eventos de los próximos 7 días de las cuentas conectadas.
 - `enviar_correo` — Manda un correo de verdad desde tu cuenta. Solo con el `aprobacion_id` de una aprobación que tú ya aprobaste.
@@ -191,7 +210,9 @@ Mientras la app de Google esté «en pruebas» (lo normal para uso personal), Go
 - `GET /api/tareas`, `/api/rutinas`, `/api/aprobaciones`, `/api/actividad`, `/api/correos`, `/api/eventos` — cada lista por separado.
 - `POST /api/tareas` — agregar una tarea a mano.
 - `PATCH /api/tareas/:id`, `/api/rutinas/:id`, `/api/aprobaciones/:id` — marcar hecha, encender/apagar, aprobar o rechazar.
-- `GET` y `PUT /api/ajustes` — nombre, color, fondo, logo, voz y sonido.
+- `GET` y `PUT /api/ajustes` — nombre, color, fondo, logo, voz, sonido y agente.
+- `GET`, `POST` y `DELETE /api/foto` y `/api/icono` — tu foto y el ícono de la app: `POST` con la imagen tal cual (`Content-Type: image/png`, por ejemplo) o como `multipart` en el campo `archivo`. El ícono se sirve sin clave (lo pide el navegador); la foto, solo con la cookie o la clave.
+- `GET /icon`, `/apple-icon`, `/iconos/192.png`, `/iconos/512.png`, `/iconos/maskable-*.png` y `/manifest.webmanifest` — los íconos y el manifiesto, generados con el ícono que subiste o con la inicial.
 - `POST /api/enviar` — contestar un correo o un WhatsApp desde la pantalla: deja la aprobación aprobada y, si hay cuenta conectada, lo manda (`canal`, `para`, `asunto`, `texto`, `titulo`, `detalle`).
 - `GET /api/conexiones` — el estado de tus cuentas conectadas (nunca devuelve las llaves).
 - `GET /api/conexiones/google/iniciar`, `/callback` (igual con `microsoft`) — el flujo de permiso; los usa el navegador.

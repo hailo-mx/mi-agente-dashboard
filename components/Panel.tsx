@@ -36,6 +36,7 @@ export default function Panel({ ajustesIniciales, vistaInicial = 'Inicio' }: { a
   const etag = useRef('');
   const ajustesVivos = useRef(ajustesIniciales);
   const porGuardar = useRef(false);
+  const ultimoGuardado = useRef(0);
   const reloj = useRef<ReturnType<typeof setTimeout>>();
   const relojAviso = useRef<ReturnType<typeof setTimeout>>();
 
@@ -46,6 +47,7 @@ export default function Panel({ ajustesIniciales, vistaInicial = 'Inicio' }: { a
   }, []);
 
   const cargar = useCallback(async () => {
+    const inicio = Date.now();
     try {
       const r = await fetch('/api/datos', { cache: 'no-store', headers: etag.current ? { 'If-None-Match': etag.current } : {} });
       if (r.status === 401) return window.location.reload();
@@ -55,8 +57,8 @@ export default function Panel({ ajustesIniciales, vistaInicial = 'Inicio' }: { a
       if (!r.ok) return setFalla(j?.error ?? 'No se pudieron leer tus datos.');
       etag.current = r.headers.get('etag') ?? '';
       setDatos(j);
-      // Mientras estás cambiando los ajustes, no se pisan con lo que llega del servidor.
-      if (!porGuardar.current) {
+      // Mientras estás cambiando los ajustes (o si esta lectura salió antes de que terminara de guardar), no se pisan con lo que llega del servidor.
+      if (!porGuardar.current && inicio > ultimoGuardado.current) {
         ajustesVivos.current = j.ajustes;
         setAjustes(j.ajustes);
       }
@@ -109,10 +111,18 @@ export default function Panel({ ajustesIniciales, vistaInicial = 'Inicio' }: { a
           avisar('No hay conexión: tus ajustes no se guardaron.');
         }
         porGuardar.current = false;
+        ultimoGuardado.current = Date.now();
       }, 500);
     },
     [avisar],
   );
+
+  // Después de subir o quitar una foto o un ícono, el servidor manda los ajustes ya actualizados.
+  const reemplazarAjustes = useCallback((nuevos: TipoAjustes) => {
+    ajustesVivos.current = nuevos;
+    ultimoGuardado.current = Date.now();
+    setAjustes(nuevos);
+  }, []);
 
   // El nombre y el color de la barra del navegador también cambian en vivo.
   useEffect(() => {
@@ -120,9 +130,9 @@ export default function Panel({ ajustesIniciales, vistaInicial = 'Inicio' }: { a
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', COLOR_FONDO[ajustes.fondo]);
   }, [ajustes.nombreApp, ajustes.fondo]);
 
-  // Cada botón suena al picarle, salvo que el sonido esté apagado.
+  // Cada botón (y liga) suena al picarle, salvo que el sonido esté apagado.
   const sonar = (e: MouseEvent) => {
-    if (ajustes.sonido && (e.target as HTMLElement).closest('button, label')) clic();
+    if (ajustes.sonido && (e.target as HTMLElement).closest('button, label, a')) clic();
   };
 
   const ir = (v: Vista) => { setVista(v); setAbierto(false); setChatMovil(false); setRedactando(false); };
@@ -334,7 +344,7 @@ export default function Panel({ ajustesIniciales, vistaInicial = 'Inicio' }: { a
         <span><i style={{ background: t.color }} />{t.nombre}</span>
       </button>
     ));
-    centro = <Ajustes ajustes={ajustes} cambiar={cambiarAjustes} />;
+    centro = <Ajustes ajustes={ajustes} cambiar={cambiarAjustes} reemplazar={reemplazarAjustes} avisar={avisar} />;
   } else {
     lista = EN_MAS.map(atajo);
   }
@@ -351,9 +361,9 @@ export default function Panel({ ajustesIniciales, vistaInicial = 'Inicio' }: { a
   );
   const quien = (
     <span className="mt-quien-nombre">
-      {ajustes.logo ? (
+      {ajustes.foto || ajustes.logo ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={ajustes.logo} alt="Tu logo" />
+        <img src={ajustes.foto || ajustes.logo} alt={ajustes.foto ? 'Tu foto' : 'Tu logo'} />
       ) : (
         <span className="mt-inicial" aria-hidden>{((ajustes.tuNombre || ajustes.nombreApp).trim()[0] ?? 'M').toUpperCase()}</span>
       )}
@@ -419,7 +429,7 @@ export default function Panel({ ajustesIniciales, vistaInicial = 'Inicio' }: { a
             {/* tu agente */}
             <div className={`mt-chat ${chatMovil ? 'abierto' : 'oculto-movil'}`}>
               <button type="button" className="mt-x solo-tablet" aria-label="Cerrar" title="Cerrar" onClick={() => setChatMovil(false)}>✕</button>
-              <Agente actividad={d?.actividad ?? []} nombre={ajustes.tuNombre} ir={() => ir('Ajustes')} />
+              <Agente actividad={d?.actividad ?? []} nombre={ajustes.tuNombre} agente={ajustes.agente ?? ''} ir={() => ir('Ajustes')} />
             </div>
           </div>
 

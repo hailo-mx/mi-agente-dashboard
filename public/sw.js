@@ -37,7 +37,7 @@ self.addEventListener('fetch', (e) => {
   if (pedido.method !== 'GET') return;
   const url = new URL(pedido.url);
   if (url.origin !== self.location.origin) return;
-  if (url.pathname.startsWith('/api/') || url.pathname === '/mcp') return;
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/mcp')) return;
 
   // Los archivos compilados no cambian de nombre: caché primero.
   if (url.pathname.startsWith('/_next/static/')) {

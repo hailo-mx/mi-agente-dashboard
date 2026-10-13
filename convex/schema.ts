@@ -85,5 +85,8 @@ export default defineSchema({
     logo: v.optional(v.string()),
     sonido: v.boolean(),
     voz: v.optional(v.string()),
+    agente: v.optional(v.string()),
+    foto: v.optional(v.string()),
+    icono: v.optional(v.string()),
   }),
 });

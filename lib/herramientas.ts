@@ -2,7 +2,8 @@
 import * as acciones from './acciones';
 import { almacen } from './almacen';
 import * as conexiones from './conexiones';
-import { CANALES, ESTADOS } from './tipos';
+import { AGENTES, CANALES, ESTADOS, FONDOS } from './tipos';
+import { VOCES } from './tema';
 
 type Entrada = Record<string, unknown>;
 
@@ -172,13 +173,31 @@ export const HERRAMIENTAS: Herramienta[] = [
   },
   {
     name: 'leer_ajustes',
-    description: 'Devuelve los ajustes del panel: cómo se llama la app y cómo se llama la persona, para que le hables por su nombre.',
+    description: 'Devuelve los ajustes del panel: cómo se llama la app y cómo se llama la persona (para que le hables por su nombre), el color, el fondo, la voz elegida y en qué agente vive (dots, grok o muse).',
     inputSchema: { type: 'object', properties: {} },
     ejecutar: async () => {
-      // El logo es una imagen pesada: solo se dice si existe.
-      const { logo, ...resto } = await almacen().leerAjustes();
-      return { ...resto, tieneLogo: Boolean(logo) };
+      // Las imágenes son pesadas: solo se dice si existen.
+      const { logo, foto, icono, ...resto } = await almacen().leerAjustes();
+      return { ...resto, tieneLogo: Boolean(logo), tieneFoto: Boolean(foto), tieneIcono: Boolean(icono) };
     },
+  },
+  {
+    name: 'guardar_ajustes',
+    description:
+      'Cambia uno o varios ajustes del panel. Manda solo los campos que quieras cambiar. Úsala cuando la persona te pida, por ejemplo, cambiar el color, su nombre, la voz o decirle al panel en qué agente vives (dots, grok o muse: con dots y grok el panel muestra el botón Llamar; muse no tiene llamadas de voz).',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        nombre: { type: 'string', description: 'El nombre de la app (máximo 40 letras).' },
+        tuNombre: { type: 'string', description: 'Cómo se llama la persona, para saludarla.' },
+        color: { type: 'string', description: 'Color de acento con formato #rrggbb. Ejemplo: #2f6df6.' },
+        fondo: { type: 'string', enum: [...FONDOS], description: 'El fondo del panel.' },
+        voz: { type: 'string', enum: [...VOCES], description: 'La voz elegida.' },
+        sonido: { type: 'boolean', description: 'Si los botones suenan al tocarlos.' },
+        agente: { type: 'string', enum: AGENTES.filter(Boolean), description: 'En qué agente vives: dots (OpenAI), grok (xAI Grok Bot) o muse (Meta).' },
+      },
+    },
+    ejecutar: (a) => acciones.cambiarAjustes(a),
   },
   {
     name: 'listar_conexiones',

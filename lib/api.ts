@@ -2,10 +2,13 @@
 import { ErrorDeDatos } from './acciones';
 import { agenteAutorizado, hayClave, navegadorAutorizado } from './acceso';
 
+/** Vale la cookie del navegador o, para probar con curl, el mismo encabezado Bearer del agente. */
+export function autorizado(peticion: Request): boolean {
+  return navegadorAutorizado() || (hayClave() && agenteAutorizado(peticion));
+}
+
 export async function responder(peticion: Request, trabajo: () => Promise<unknown>): Promise<Response> {
-  // Vale la cookie del navegador o, para probar con curl, el mismo encabezado Bearer del agente.
-  const autorizado = navegadorAutorizado() || (hayClave() && agenteAutorizado(peticion));
-  if (!autorizado) return Response.json({ error: 'Falta la clave de acceso.' }, { status: 401 });
+  if (!autorizado(peticion)) return Response.json({ error: 'Falta la clave de acceso.' }, { status: 401 });
   try {
     return Response.json(await trabajo());
   } catch (e) {

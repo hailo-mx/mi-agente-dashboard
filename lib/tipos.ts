@@ -45,7 +45,14 @@ export type Whatsapp = { id: string; idProveedor: string; de: string; nombre?: s
 export const FONDOS = ['calido', 'noche', 'aurora', 'grafito'] as const;
 export type Fondo = (typeof FONDOS)[number];
 
-export type Ajustes = { nombreApp: string; tuNombre: string; color: string; fondo: Fondo; logo?: string; sonido: boolean; voz?: string };
+export const AGENTES = ['dots', 'grok', 'muse', ''] as const;
+export type Agente = (typeof AGENTES)[number];
+/** Los agentes con los que se puede hablar por voz; Muse no tiene llamadas. */
+export const AGENTES_CON_VOZ: Agente[] = ['dots', 'grok'];
+export const NOMBRE_AGENTE: Record<Agente, string> = { dots: 'Dots', grok: 'Grok Bot', muse: 'Muse', '': 'Sin elegir' };
+
+/** foto e icono: en el servidor, la imagen (data URL o marcador de Blob); en la pantalla, la dirección /api/foto o /api/icono. */
+export type Ajustes = { nombreApp: string; tuNombre: string; color: string; fondo: Fondo; logo?: string; sonido: boolean; voz?: string; agente?: Agente; foto?: string; icono?: string };
 
 export type Colecciones = {
   tareas: Tarea;
