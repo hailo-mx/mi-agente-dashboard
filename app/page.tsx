@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function Pagina() {
   // Con CLAVE_AGENTE puesta, primero se pide la clave (una sola vez por navegador).
-  if (!navegadorAutorizado()) return <Entrar />;
-  return <Panel ajustesIniciales={ajustesParaPantalla(await ajustesActuales())} />;
+  const ajustes = await ajustesActuales();
+  if (!navegadorAutorizado()) return <Entrar sonido={ajustes.sonido} />;
+  return <Panel ajustesIniciales={ajustesParaPantalla(ajustes)} />;
 }

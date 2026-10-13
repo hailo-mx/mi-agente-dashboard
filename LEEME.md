@@ -18,12 +18,24 @@ Se puede **instalar como app** (PWA): en iPhone/iPad, Safari → Compartir → �
 - **Rutinas**: lo que tu agente hace solo y a qué hora; cada una se puede pausar.
 - **Aprobaciones**: lo que tu agente quiere mandar en tu nombre, con el texto exacto. Aprobar, Editar o rechazar (✕).
 - **Conexiones**: conectar Google, Microsoft 365 y WhatsApp Business.
-- **Ajustes**: tema, color, fondo, en qué agente vives (Dots, Grok Bot o Muse), voz, logo y sonido; el nombre de la app y el tuyo; tu foto; el ícono de tu app; la dirección MCP para tu agente.
-- **Tu agente** (la columna de la derecha, o la pestaña «Agente» en el celular): tu agente vive en Dots, Grok Bot o Muse; aquí solo se ve lo último que hizo. No se le escribe desde el panel. Si elegiste Dots o Grok Bot, aparece el botón **Llamar**: abre la app de tu agente en otra pestaña y ahí tocas el ícono de voz (ninguna de las dos tiene una liga que abra la voz directo). Muse no tiene llamadas de voz.
+- **Ajustes**: tema, color, fondo, en qué agente vives (Dots, Grok Bot o Muse), su voz y el sonido; el nombre de la app y el tuyo; tu foto; tu logo (que es el ícono de tu app); la dirección MCP para tu agente.
+- **Tu agente** (la columna de la derecha, o la pestaña con el nombre de tu agente en el celular): aquí solo se ve lo último que hizo. No se le escribe desde el panel. Todo el panel habla solo de **tu** agente: en cuanto eliges dónde vive (en Ajustes, o él mismo con `guardar_ajustes` en la lección 6.3), el título dice «Vive en Dots», la pestaña del celular se llama como él y solo aparecen las opciones que ese agente tiene. Mientras no lo elijas, dice «Tu agente» con una línea que te recuerda cómo elegirlo. Si vive en Dots o Grok Bot, aparece el botón **Llamar**: abre la app de tu agente en otra pestaña y ahí tocas el ícono de voz (ninguna de las dos tiene una liga que abra la voz directo). Muse no tiene llamadas de voz.
 
-### Tu foto y el ícono de tu app
+### La voz de tu agente
 
-En Ajustes puedes subir **tu foto** (se ve arriba, junto a tu nombre) y el **ícono de tu app** (el de la pestaña del navegador, el de la pantalla de inicio del teléfono y el del manifiesto para instalarla). Valen JPG, PNG o WebP de hasta 2 MB; el navegador las achica antes de subirlas. Si hay Vercel Blob, se guardan ahí como archivos privados; si no, dentro de tus datos. Con **Quitar** vuelve la inicial de tu nombre. Si ya tenías la app instalada en el teléfono, vuelve a instalarla para ver el ícono nuevo.
+La voz no suena en el panel: suena en la app de tu agente. En Ajustes solo eliges cuál quieres que use (se guarda en `voz` y tu agente la lee con `leer_ajustes`), y el botón «Abrir ajustes de voz de …» te lleva a donde se cambia de verdad. Las listas son las voces reales de cada app, verificadas el 2026-10-12:
+
+- **Dots (ChatGPT)**: Cove, Spruce, Ember, Arbor, Juniper, Vale, Maple, Breeze y Sol. Son las nueve del menú Ajustes → Voz de chatgpt.com (`https://chatgpt.com/settings/voice`), tal como las muestra hoy, y coinciden con el anuncio de OpenAI de septiembre de 2024 (TechCrunch, «OpenAI rolls out Advanced Voice Mode with more voices and a new look»: Arbor, Maple, Sol, Spruce y Vale se sumaron a Breeze, Juniper, Cove y Ember).
+- **Grok Bot (Grok)**: Ara, Rex, Sal, Eve y Leo. Son las cinco voces de Grok Voice que lista xAI en su página oficial (`https://x.ai/news/new-flagship-voices`, julio de 2026: «the original five: Ara, Eve, Leo, Rex, Sal»). Grok no tiene una liga directa a la pantalla de voz: el botón abre grok.com y ahí se toca el ícono de voz. La app de Grok puede traer voces extra de temporada que no están en esa página; si tu agente usa una de esas, elígela directo en la app.
+- **Muse**: no tiene voz, así que no hay sección de voz.
+
+### Tu foto y tu logo (el ícono de tu app)
+
+En Ajustes puedes subir **tu foto** (se ve arriba, junto a tu nombre) y **tu logo**, que es una sola imagen para todo: se ve arriba junto a tu nombre si no tienes foto, en la pestaña del navegador, en la pantalla de inicio del teléfono y en el manifiesto para instalar la app. Valen JPG, PNG o WebP de hasta 2 MB; el navegador las achica antes de subirlas. Si hay Vercel Blob, se guardan ahí como archivos privados; si no, dentro de tus datos. Con **Quitar** vuelve la inicial de tu nombre. Si ya tenías la app instalada en el teléfono, vuelve a instalarla para ver el ícono nuevo.
+
+### El clic de los botones
+
+Cada botón, pestaña y liga hace un clic corto (se apaga con el altavoz de arriba o en Ajustes). Es un sonido grabado (`public/sonidos/clic.mp3`, 45 ms), no un tono generado: en iPhone y iPad el audio solo arranca dentro de un toque, así que se despierta al bajar el dedo (`pointerdown`) y suena ahí mismo, también en la pantalla de la clave.
 
 Cuando todavía no hay nada, cada sección lo dice con una línea («Tu agente todavía no ha anotado nada», «Conecta tu correo en Conexiones…»). El panel nunca inventa datos de muestra.
 
@@ -164,8 +176,8 @@ Son las que aparecen en `tools/list` (están definidas en `lib/herramientas.ts`)
 - `registrar_actividad` — Escribe una línea en la actividad reciente del panel.
 - `guardar_correos` — Sustituye el resumen de tu bandeja de entrada por la lista que mande.
 - `guardar_eventos` — Sustituye los eventos del calendario dentro de un rango de fechas.
-- `leer_ajustes` — Devuelve el nombre del panel, tu nombre, el color, el fondo, la voz elegida y en qué agente vives, para que te hable por tu nombre.
-- `guardar_ajustes` — Cambia solo los ajustes que mande: `nombre`, `tuNombre`, `color`, `fondo`, `voz`, `sonido` y `agente` (`dots`, `grok` o `muse`).
+- `leer_ajustes` — Devuelve el nombre del panel, tu nombre, el color, el fondo, la voz elegida, en qué agente vives y qué voces tiene ese agente (`vocesDisponibles`), para que te hable por tu nombre.
+- `guardar_ajustes` — Cambia solo los ajustes que mande: `nombre`, `tuNombre`, `color`, `fondo`, `voz`, `sonido` y `agente` (`dots`, `grok` o `muse`). La `voz` tiene que ser una de las voces reales del agente elegido (ver «La voz de tu agente»).
 - `listar_conexiones` — Dice qué cuentas tienes conectadas (Google, Microsoft 365, WhatsApp) y cuándo se sincronizaron.
 - `sincronizar_correo_y_calendario` — Trae a tu panel los últimos 20 hilos de tu bandeja y los eventos de los próximos 7 días de las cuentas conectadas.
 - `enviar_correo` — Manda un correo de verdad desde tu cuenta. Solo con el `aprobacion_id` de una aprobación que tú ya aprobaste.
@@ -210,8 +222,8 @@ Mientras la app de Google esté «en pruebas» (lo normal para uso personal), Go
 - `GET /api/tareas`, `/api/rutinas`, `/api/aprobaciones`, `/api/actividad`, `/api/correos`, `/api/eventos` — cada lista por separado.
 - `POST /api/tareas` — agregar una tarea a mano.
 - `PATCH /api/tareas/:id`, `/api/rutinas/:id`, `/api/aprobaciones/:id` — marcar hecha, encender/apagar, aprobar o rechazar.
-- `GET` y `PUT /api/ajustes` — nombre, color, fondo, logo, voz, sonido y agente.
-- `GET`, `POST` y `DELETE /api/foto` y `/api/icono` — tu foto y el ícono de la app: `POST` con la imagen tal cual (`Content-Type: image/png`, por ejemplo) o como `multipart` en el campo `archivo`. El ícono se sirve sin clave (lo pide el navegador); la foto, solo con la cookie o la clave.
+- `GET` y `PUT /api/ajustes` — nombre, color, fondo, voz, sonido y agente.
+- `GET`, `POST` y `DELETE /api/foto` y `/api/icono` — tu foto y tu logo (el ícono de la app): `POST` con la imagen tal cual (`Content-Type: image/png`, por ejemplo) o como `multipart` en el campo `archivo`. El ícono se sirve sin clave (lo pide el navegador); la foto, solo con la cookie o la clave.
 - `GET /icon`, `/apple-icon`, `/iconos/192.png`, `/iconos/512.png`, `/iconos/maskable-*.png` y `/manifest.webmanifest` — los íconos y el manifiesto, generados con el ícono que subiste o con la inicial.
 - `POST /api/enviar` — contestar un correo o un WhatsApp desde la pantalla: deja la aprobación aprobada y, si hay cuenta conectada, lo manda (`canal`, `para`, `asunto`, `texto`, `titulo`, `detalle`).
 - `GET /api/conexiones` — el estado de tus cuentas conectadas (nunca devuelve las llaves).

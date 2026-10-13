@@ -1,9 +1,9 @@
 'use client';
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { TEMAS } from '@/lib/tema';
-import { COLOR_FONDO, type Ajustes as TipoAjustes, type Datos } from '@/lib/tipos';
+import { COLOR_FONDO, NOMBRE_AGENTE, type Ajustes as TipoAjustes, type Datos } from '@/lib/tipos';
 import { cuando, saludo } from '@/lib/formato';
-import { Avatar, EN_MAS, Fila, Icono, NAV, PESTANAS, Vacio, clic, type Seccion, type Vista } from './comunes';
+import { Avatar, EN_MAS, Fila, Icono, NAV, PESTANAS, Vacio, usarClics, type Seccion, type Vista } from './comunes';
 import {
   Agente, Calendario, Chat, Correo, DetalleAprobacion, DetalleRutina, DIA_TEXTO, Redactar, Tareas, conversaciones, diasDe, direccionDe, horaTexto, lunesDe, nombreDe, respuestasA, type Envio, type Mandar,
 } from './Vistas';
@@ -130,10 +130,9 @@ export default function Panel({ ajustesIniciales, vistaInicial = 'Inicio' }: { a
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', COLOR_FONDO[ajustes.fondo]);
   }, [ajustes.nombreApp, ajustes.fondo]);
 
-  // Cada botón (y liga) suena al picarle, salvo que el sonido esté apagado.
-  const sonar = (e: MouseEvent) => {
-    if (ajustes.sonido && (e.target as HTMLElement).closest('button, label, a')) clic();
-  };
+  // Cada botón, pestaña y liga suena al tocarlo, salvo que el sonido esté apagado.
+  usarClics(ajustes.sonido);
+  const nombreAgente = ajustes.agente ? NOMBRE_AGENTE[ajustes.agente] : '';
 
   const ir = (v: Vista) => { setVista(v); setAbierto(false); setChatMovil(false); setRedactando(false); };
   const elegir = (id: string) => { setSel((s) => ({ ...s, [vista]: id })); setAbierto(true); setRedactando(false); };
@@ -361,9 +360,9 @@ export default function Panel({ ajustesIniciales, vistaInicial = 'Inicio' }: { a
   );
   const quien = (
     <span className="mt-quien-nombre">
-      {ajustes.foto || ajustes.logo ? (
+      {ajustes.foto || ajustes.icono ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={ajustes.foto || ajustes.logo} alt={ajustes.foto ? 'Tu foto' : 'Tu logo'} />
+        <img src={ajustes.foto || ajustes.icono} alt={ajustes.foto ? 'Tu foto' : 'Tu logo'} />
       ) : (
         <span className="mt-inicial" aria-hidden>{((ajustes.tuNombre || ajustes.nombreApp).trim()[0] ?? 'M').toUpperCase()}</span>
       )}
@@ -383,7 +382,7 @@ export default function Panel({ ajustesIniciales, vistaInicial = 'Inicio' }: { a
   );
 
   return (
-    <div onClickCapture={sonar} data-fondo={ajustes.fondo} style={{ ['--azul' as string]: ajustes.color } as CSSProperties} className="mt-cuarto">
+    <div data-fondo={ajustes.fondo} style={{ ['--azul' as string]: ajustes.color } as CSSProperties} className="mt-cuarto">
       <div className="mt-marco">
         {/* escritorio: el riel es la única navegación */}
         <nav className="mt-riel" aria-label="Secciones">
@@ -394,7 +393,7 @@ export default function Panel({ ajustesIniciales, vistaInicial = 'Inicio' }: { a
             </button>
           ))}
           {/* tablet: tu agente se abre encima de las dos columnas */}
-          <button type="button" className={`solo-tablet ${chatMovil ? 'on' : ''}`} aria-label="Tu agente" title="Tu agente" aria-pressed={chatMovil} onClick={() => setChatMovil((v) => !v)}>
+          <button type="button" className={`solo-tablet ${chatMovil ? 'on' : ''}`} aria-label={nombreAgente || 'Tu agente'} title={nombreAgente || 'Tu agente'} aria-pressed={chatMovil} onClick={() => setChatMovil((v) => !v)}>
             <Icono nombre="Agente" />
           </button>
         </nav>
@@ -438,7 +437,7 @@ export default function Panel({ ajustesIniciales, vistaInicial = 'Inicio' }: { a
             {PESTANAS.map((v) => (
               <button type="button" key={v} onClick={() => (v === 'Agente' ? setChatMovil(true) : ir(v))} className={pestana === v ? 'on' : ''} aria-current={pestana === v ? 'page' : undefined}>
                 {v === 'Agente' ? <Avatar lado={30} /> : <Icono nombre={v} lado={21} />}
-                <span>{v === 'Agente' ? 'Agente' : v}</span>
+                <span>{v === 'Agente' ? nombreAgente || 'Agente' : v}</span>
                 {(badges[v] ?? 0) > 0 && <b />}
               </button>
             ))}

@@ -37,13 +37,22 @@ img { display: block; }
 .v2-cifra { font-variant-numeric: tabular-nums; }
 
 /* ── el cuarto en penumbra: ocupa toda la pantalla ── */
+/* Instalado como app en iPhone/iPad la barra de estado se dibuja encima (black-translucent):
+   los --seguro-* son lo que ocupa (y la muesca/barra de inicio) y todo lo que va pegado a la orilla los suma. */
+:root {
+  --seguro-arriba: env(safe-area-inset-top, 0px);
+  --seguro-abajo: env(safe-area-inset-bottom, 0px);
+  --seguro-izq: env(safe-area-inset-left, 0px);
+  --seguro-der: env(safe-area-inset-right, 0px);
+}
 .mt-cuarto {
   position: fixed;
   inset: 0;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: calc(20px + var(--seguro-arriba)) calc(20px + var(--seguro-der)) calc(20px + var(--seguro-abajo)) calc(20px + var(--seguro-izq));
   overflow: hidden;
   transition: background 0.5s;
 }
@@ -366,7 +375,7 @@ textarea.mt-campo.sin-linea { border-bottom: 0; }
 .mt-icono-muestra { width: 44px; height: 44px; border-radius: 11px; object-fit: cover; }
 .mt-imagenes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 40px; }
 .mt-imagenes .mt-etiqueta { margin-top: 0; }
-.mt-escuchar { display: inline-flex; align-items: center; gap: 6px; }
+.mt-abrir { display: inline-block; margin-top: 10px; text-decoration: none; }
 .mt-llamar { gap: 6px; text-decoration: none; }
 .mt-pista { margin-top: 10px; }
 .mt-grupo { margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.08); }
@@ -402,7 +411,7 @@ textarea.mt-campo.sin-linea { border-bottom: 0; }
 
 /* ── tablet (iPad): riel de íconos y dos columnas; tu agente se abre con el botón del riel ── */
 @media (min-width: 768px) and (max-width: 1199px) {
-  .mt-cuarto { padding: 12px; }
+  .mt-cuarto { padding: calc(12px + var(--seguro-arriba)) calc(12px + var(--seguro-der)) calc(12px + var(--seguro-abajo)) calc(12px + var(--seguro-izq)); }
   .mt-marco { padding-left: 66px; }
   .mt-riel { gap: 4px; padding: 5px; }
   .mt-riel button { width: 44px; height: 44px; }
@@ -429,7 +438,7 @@ textarea.mt-campo.sin-linea { border-bottom: 0; }
 /* ── celular: el dashboard es una app de pantalla completa, de orilla a orilla ── */
 @media (max-width: 767px) {
   .mt-cuarto { padding: 0; }
-  .mt-cuarto.puerta { padding: 20px; }
+  .mt-cuarto.puerta { padding: calc(20px + var(--seguro-arriba)) calc(20px + var(--seguro-der)) calc(20px + var(--seguro-abajo)) calc(20px + var(--seguro-izq)); }
   .mt-marco { max-width: none; max-height: none; padding-left: 0; }
   .mt-riel { display: none; }
   .mt-vidrio.mt-app { border: 0; border-radius: 0; box-shadow: none; }
@@ -441,9 +450,10 @@ textarea.mt-campo.sin-linea { border-bottom: 0; }
     padding: 0;
     overflow: hidden;
   }
-  .mt-bandas { padding: 0 16px; }
-  .mt-barra-arriba { flex: none; display: flex; align-items: center; justify-content: space-between; padding: max(20px, env(safe-area-inset-top)) 20px 12px; }
-  .mt-app-cuerpo { display: block; flex: 1; min-height: 0; overflow-y: auto; padding: 4px 16px 16px; scrollbar-width: none; }
+  .mt-bandas { padding: 0 calc(16px + var(--seguro-der)) 0 calc(16px + var(--seguro-izq)); }
+  /* la barra de arriba empieza debajo de la barra de estado del teléfono */
+  .mt-barra-arriba { flex: none; display: flex; align-items: center; justify-content: space-between; padding: calc(12px + var(--seguro-arriba)) calc(20px + var(--seguro-der)) 12px calc(20px + var(--seguro-izq)); }
+  .mt-app-cuerpo { display: block; flex: 1; min-height: 0; overflow-y: auto; padding: 4px calc(16px + var(--seguro-der)) 16px calc(16px + var(--seguro-izq)); scrollbar-width: none; }
   .mt-app-cuerpo::-webkit-scrollbar { display: none; }
   .mt-panel-izq, .mt-centro, .mt-chat { overflow: visible; min-height: 0; }
   .mt-panel-izq { border: 0; padding: 0; }
@@ -455,7 +465,7 @@ textarea.mt-campo.sin-linea { border-bottom: 0; }
     display: grid;
     flex: none;
     grid-template-columns: repeat(5, 1fr);
-    padding: 8px 8px max(10px, env(safe-area-inset-bottom));
+    padding: 8px calc(8px + var(--seguro-der)) calc(8px + var(--seguro-abajo)) calc(8px + var(--seguro-izq));
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(18, 17, 20, 0.72);
   }

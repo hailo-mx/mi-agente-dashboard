@@ -1,6 +1,6 @@
 'use client';
 import { useState, type FormEvent } from 'react';
-import { AGENTES_CON_VOZ, NOMBRE_AGENTE, type Actividad, type Agente as TipoAgente, type Aprobacion, type Correo as TipoCorreo, type Evento, type Rutina, type Tarea, type Whatsapp } from '@/lib/tipos';
+import { APP_AGENTE, AGENTES_CON_VOZ, NOMBRE_AGENTE, type Actividad, type Agente as TipoAgente, type Aprobacion, type Correo as TipoCorreo, type Evento, type Rutina, type Tarea, type Whatsapp } from '@/lib/tipos';
 import { cuando, diaDeTarea, inicioDelDia, mismoDia } from '@/lib/formato';
 import { Avatar, Icono, Vacio } from './comunes';
 
@@ -322,23 +322,24 @@ export function DetalleAprobacion({ a, mandar }: { a: Aprobacion; mandar: Mandar
 
 /* ── "Pídeselo a tu agente": tu agente vive en su app; aquí se ve lo que hizo ── */
 
-/* Dónde se abre el modo de voz de cada agente. Ni ChatGPT ni Grok tienen una liga que lo abra directo:
+/* Cómo se llama por voz a cada agente. Ni ChatGPT ni Grok tienen una liga que abra la voz directo:
    se abre la app y se toca el ícono de voz. */
-export const LLAMADA: Partial<Record<TipoAgente, { url: string; pista: string }>> = {
-  dots: { url: 'https://chatgpt.com/', pista: 'Se abre ChatGPT: toca el ícono de voz junto a la cajita de escribir.' },
-  grok: { url: 'https://grok.com/', pista: 'Se abre Grok: toca el ícono de voz junto a la cajita de escribir.' },
+const PISTA_LLAMADA: Partial<Record<TipoAgente, string>> = {
+  dots: 'Se abre ChatGPT: toca el ícono de voz junto a la cajita de escribir.',
+  grok: 'Se abre Grok: toca el ícono de voz junto a la cajita de escribir.',
 };
 
 export function Agente({ actividad, nombre, agente, ir }: { actividad: Actividad[]; nombre: string; agente: TipoAgente; ir: () => void }) {
   const ultimas = [...actividad].sort((a, b) => b.cuando.localeCompare(a.cuando)).slice(0, 5).reverse();
-  const llamada = AGENTES_CON_VOZ.includes(agente) ? LLAMADA[agente] : undefined;
+  const nombreAgente = NOMBRE_AGENTE[agente];
+  const llamada = AGENTES_CON_VOZ.includes(agente) ? { url: APP_AGENTE[agente].url, pista: PISTA_LLAMADA[agente] ?? '' } : undefined;
   return (
     <>
       <div className="mt-chat-cabeza">
         <Avatar lado={44} />
         <div style={{ minWidth: 0, flex: 1 }}>
-          <p>Tu agente</p>
-          <p>{agente ? `Vive en ${NOMBRE_AGENTE[agente]}` : 'Vive en Dots, Grok Bot o Muse'}</p>
+          <p>{agente ? nombreAgente : 'Tu agente'}</p>
+          <p>{agente ? `Vive en ${nombreAgente}` : 'Todavía no eliges dónde vive'}</p>
         </div>
         {llamada && (
           <a className="mt-btn chico mt-llamar" href={llamada.url} target="_blank" rel="noopener noreferrer" title={llamada.pista}>
@@ -350,10 +351,10 @@ export function Agente({ actividad, nombre, agente, ir }: { actividad: Actividad
       {llamada ? (
         <p className="mt-ayuda mt-pista">{llamada.pista}</p>
       ) : (
-        agente === 'muse' && <p className="mt-ayuda mt-pista">Muse no tiene llamadas de voz.</p>
+        !agente && <p className="mt-ayuda mt-pista">Corre la lección 6.3 (tu agente lo guarda con guardar_ajustes) o elígelo en Ajustes.</p>
       )}
       <div className="mt-hilo">
-        <p className="mt-globo el">Pídeselo a tu agente desde su app{nombre ? `, ${nombre}` : ''}. Lo que haga por ti aparece aquí y en cada sección.</p>
+        <p className="mt-globo el">Pídeselo a tu agente desde {agente ? nombreAgente : 'su app'}{nombre ? `, ${nombre}` : ''}. Lo que haga por ti aparece aquí y en cada sección.</p>
         {ultimas.length === 0 ? (
           <p className="mt-globo el">Todavía no ha anotado nada. Conéctalo con la dirección MCP que está en Ajustes.</p>
         ) : (
@@ -366,7 +367,7 @@ export function Agente({ actividad, nombre, agente, ir }: { actividad: Actividad
         )}
       </div>
       <div className="mt-chat-pie">
-        <button type="button" className="mt-chip" onClick={ir}>{agente ? 'Ajustes del agente' : 'Cómo conectarlo'}</button>
+        <button type="button" className="mt-chip" onClick={ir}>{agente ? `Ajustes de ${nombreAgente}` : 'Elegir mi agente'}</button>
       </div>
     </>
   );

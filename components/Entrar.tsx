@@ -1,8 +1,11 @@
 'use client';
 import { useState, type FormEvent } from 'react';
+import { usarClics } from './comunes';
 
 /* La puerta: se escribe la clave una vez y el navegador la recuerda 60 días. */
-export default function Entrar() {
+/* `sonido` viene de los ajustes guardados: el botón Entrar también hace clic. */
+export default function Entrar({ sonido = true }: { sonido?: boolean }) {
+  usarClics(sonido);
   const [clave, setClave] = useState('');
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);

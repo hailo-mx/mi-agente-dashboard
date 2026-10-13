@@ -1,5 +1,5 @@
 'use client';
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 
 /* Las secciones, en el orden del riel. */
 export const NAV = ['Inicio', 'Calendario', 'Correos', 'WhatsApp', 'Tareas', 'Rutinas', 'Aprobaciones', 'Conexiones', 'Ajustes'] as const;
@@ -25,7 +25,6 @@ const ICONOS: Record<string, string> = {
   SonidoOff: 'M4 10v4h3l5 4V6L7 10zm12 0l5 5m0-5l-5 5',
   Enviar: 'M5 12l14-7-5 14-3-6z',
   Llamar: 'M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z',
-  Escuchar: 'M8 5v14l11-7z',
 };
 
 export function Icono({ nombre, lado = 18 }: { nombre: string; lado?: number }) {
@@ -36,7 +35,7 @@ export function Icono({ nombre, lado = 18 }: { nombre: string; lado?: number }) 
   );
 }
 
-/* Tu agente no tiene cara aquí (vive en Dots, Grok Bot o Muse): una chispa del color de acento. */
+/* Tu agente no tiene cara aquí (vive en su propia app): una chispa del color de acento. */
 export function Avatar({ lado = 44 }: { lado?: number }) {
   return (
     <span className="mt-avatar" style={{ width: lado, height: lado }} aria-hidden>
@@ -64,41 +63,116 @@ export function Vacio({ children }: { children: ReactNode }) {
   return <p className="mt-vacio">{children}</p>;
 }
 
-let audio: AudioContext | null = null;
-let desbloqueado = false;
+/* ── el clic ──
+   Un sonido grabado (public/sonidos/clic.mp3, 45 ms) y no un oscilador: en iPhone y iPad el oscilador no se oía.
+   Se descifra a un AudioBuffer y se toca con Web Audio (sin retraso); si todavía no está listo, se toca con <audio>.
+   iOS solo deja arrancar el audio DENTRO de un toque (pointerdown/touchstart, no click): ahí se despierta. */
+const RUTA_CLIC = '/sonidos/clic.mp3';
 // Un WAV de un cuadro en silencio. En iPhone, reproducir un <audio> dentro del toque pasa el sonido
 // a la categoría «reproducción»: así el clic se oye aunque el interruptor de silencio esté puesto.
 const SILENCIO = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA=';
 
-/* Clic corto. En el teléfono el audio arranca dormido: hay que despertarlo dentro del toque. */
-export function clic() {
+let ctx: AudioContext | null = null;
+let muestra: AudioBuffer | null = null;
+let cargando = false;
+let elementos: HTMLAudioElement[] = [];
+let cualElemento = 0;
+let desbloqueado = false;
+
+function contexto(): AudioContext | null {
+  if (ctx) return ctx;
+  const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!Ctx) return null;
+  ctx = new Ctx();
+  return ctx;
+}
+
+/** Baja y descifra la muestra una sola vez. */
+function cargarMuestra() {
+  const c = contexto();
+  if (!c || muestra || cargando) return;
+  cargando = true;
+  fetch(RUTA_CLIC)
+    .then((r) => r.arrayBuffer())
+    .then((bytes) => new Promise<AudioBuffer>((listo, falla) => c.decodeAudioData(bytes, listo, falla)))
+    .then((b) => { muestra = b; })
+    .catch(() => undefined)
+    .finally(() => { cargando = false; });
+}
+
+/** Despierta el audio. Hay que llamarla dentro del primer toque (pointerdown), si no iOS lo deja mudo. */
+export function despertarAudio() {
   try {
+    if (elementos.length === 0) elementos = [0, 1, 2].map(() => { const a = new Audio(RUTA_CLIC); a.preload = 'auto'; return a; });
+    cargarMuestra();
+    const c = contexto();
+    if (c) {
+      if (c.state !== 'running') c.resume().catch(() => undefined);
+      if (!desbloqueado) {
+        // Un cuadro en silencio por Web Audio: con esto iOS destraba el contexto dentro del toque.
+        const s = c.createBufferSource();
+        s.buffer = c.createBuffer(1, 1, 22050);
+        s.connect(c.destination);
+        s.start(0);
+      }
+    }
     if (!desbloqueado) {
       desbloqueado = true;
       const a = new Audio(SILENCIO);
       a.play().catch(() => undefined);
     }
-    const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    audio ??= new Ctx();
-    const ctx = audio;
-    const sonar = () => {
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      const t = ctx.currentTime;
-      o.type = 'triangle';
-      o.frequency.setValueAtTime(880, t);
-      o.frequency.exponentialRampToValueAtTime(520, t + 0.07);
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.32, t + 0.006);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
-      o.connect(g).connect(ctx.destination);
-      o.start(t);
-      o.stop(t + 0.1);
-    };
-    // «suspended» al crearlo fuera de un toque; «interrupted» (iOS) al volver de segundo plano o de una llamada.
-    if (ctx.state !== 'running') ctx.resume().then(sonar, () => undefined);
-    else sonar();
   } catch {
     /* sin audio: no pasa nada */
   }
+}
+
+/* Clic corto. */
+export function clic() {
+  try {
+    despertarAudio();
+    const c = contexto();
+    if (c && muestra && c.state === 'running') {
+      const s = c.createBufferSource();
+      s.buffer = muestra;
+      s.connect(c.destination);
+      s.start(0);
+      return;
+    }
+    // Todavía no está descifrada (o no hay Web Audio): se toca con <audio>.
+    const a = elementos[cualElemento++ % elementos.length];
+    if (!a) return;
+    a.currentTime = 0;
+    a.play().catch(() => undefined);
+  } catch {
+    /* sin audio: no pasa nada */
+  }
+}
+
+/** Qué cuenta como «algo que se toca»: botones, ligas, etiquetas de archivo y pestañas. */
+const TOCABLE = 'button, a, label, [role="button"], [role="tab"], summary';
+
+/* Hace sonar cada botón, pestaña y liga mientras `activo` sea true. Va en el documento, con captura,
+   así suena también lo que se abre encima (la puerta, Ajustes, el agente). Suena al bajar el dedo (pointerdown,
+   que es cuando iOS deja sonar) y, si se activó sin tocar (teclado), al click. */
+export function usarClics(activo: boolean) {
+  useEffect(() => {
+    if (!activo) return;
+    let ultimoToque = 0;
+    const alBajar = (e: Event) => {
+      if (!(e.target as HTMLElement | null)?.closest?.(TOCABLE)) return despertarAudio();
+      ultimoToque = Date.now();
+      clic();
+    };
+    const alClic = (e: Event) => {
+      if (!(e.target as HTMLElement | null)?.closest?.(TOCABLE)) return;
+      if (Date.now() - ultimoToque < 500) return; // ya sonó al bajar el dedo
+      clic();
+    };
+    document.addEventListener('pointerdown', alBajar, true);
+    document.addEventListener('click', alClic, true);
+    return () => {
+      document.removeEventListener('pointerdown', alBajar, true);
+      document.removeEventListener('click', alClic, true);
+    };
+  }, [activo]);
 }

@@ -1,19 +1,14 @@
 'use client';
-import { useEffect, useRef, useState, type ChangeEvent } from 'react';
-import { COLORES, FONDOS, TEMAS, VOCES } from '@/lib/tema';
-import { AGENTES_CON_VOZ, NOMBRE_AGENTE, type Agente, type Ajustes as TipoAjustes } from '@/lib/tipos';
-import { Icono } from './comunes';
+import { useEffect, useState, type ChangeEvent } from 'react';
+import { COLORES, FONDOS, TEMAS } from '@/lib/tema';
+import { APP_AGENTE, AGENTES_CON_VOZ, NOMBRE_AGENTE, VOCES_AGENTE, type Agente, type Ajustes as TipoAjustes } from '@/lib/tipos';
 
 type Props = { ajustes: TipoAjustes; cambiar: (cambios: Partial<TipoAjustes>) => void };
 type PropsCompletas = Props & { reemplazar: (ajustes: TipoAjustes) => void; avisar: (texto: string) => void };
 
-const MAX_LOGO = 200 * 1024;
 const MAX_IMAGEN = 2 * 1024 * 1024;
 const TIPOS_IMAGEN = ['image/jpeg', 'image/png', 'image/webp'];
 const OPCIONES_AGENTE: Agente[] = ['dots', 'grok', 'muse'];
-
-/* Cómo suena cada voz en la vista previa del navegador (la de verdad la eliges en la app de tu agente). */
-const TONO: Record<string, { pitch: number; rate: number }> = { Sol: { pitch: 1.1, rate: 1 }, Río: { pitch: 0.9, rate: 0.95 }, Ámbar: { pitch: 1.25, rate: 1.05 }, Cobalto: { pitch: 0.75, rate: 0.9 } };
 
 /** Achica la imagen en el navegador (cuadrada, recortada al centro) para que pese poco. */
 async function achicar(archivo: File, lado: number, tipo: 'image/jpeg' | 'image/png'): Promise<Blob> {
@@ -38,7 +33,7 @@ function Imagen({ cual, titulo, ayuda, valor, lado, tipo, reemplazar, avisar }: 
       if (!r.ok) return setError(j?.error ?? 'No se pudo guardar. Inténtalo de nuevo.');
       setError('');
       reemplazar(j);
-      if (cual === 'icono') avisar(metodo === 'POST' ? 'Listo. Si ya tienes la app instalada, vuelve a instalarla para ver el ícono nuevo.' : 'El ícono volvió a ser la letra de tu app.');
+      if (cual === 'icono') avisar(metodo === 'POST' ? 'Listo: tu logo ya es el ícono de la app. Si ya la tienes instalada, vuelve a instalarla para verlo.' : 'El ícono volvió a ser la letra de tu app.');
     } catch {
       setError('No hay conexión con tu panel. Inténtalo de nuevo.');
     } finally {
@@ -79,57 +74,12 @@ function Imagen({ cual, titulo, ayuda, valor, lado, tipo, reemplazar, avisar }: 
   );
 }
 
-/* Vista previa de la voz con la que trae el navegador (en español de México si la hay). */
-function usarVozEspanol() {
-  const voz = useRef<SpeechSynthesisVoice | null>(null);
-  useEffect(() => {
-    if (typeof speechSynthesis === 'undefined') return;
-    const elegir = () => {
-      const voces = speechSynthesis.getVoices();
-      voz.current = voces.find((v) => /^es[-_]MX/i.test(v.lang)) ?? voces.find((v) => /^es[-_]?/i.test(v.lang)) ?? null;
-    };
-    elegir();
-    speechSynthesis.addEventListener('voiceschanged', elegir);
-    return () => speechSynthesis.removeEventListener('voiceschanged', elegir);
-  }, []);
-  return (nombre: string, texto: string) => {
-    if (typeof speechSynthesis === 'undefined') return false;
-    speechSynthesis.cancel();
-    const frase = new SpeechSynthesisUtterance(texto);
-    frase.lang = voz.current?.lang ?? 'es-MX';
-    if (voz.current) frase.voice = voz.current;
-    frase.pitch = TONO[nombre]?.pitch ?? 1;
-    frase.rate = TONO[nombre]?.rate ?? 1;
-    speechSynthesis.speak(frase);
-    return true;
-  };
-}
-
-/* Controles para cambiar el dashboard: tema, color, fondo, agente, voz, logo y sonido. Igual que en el demo. */
+/* Controles para cambiar el dashboard: tema, color, fondo, agente, voz y sonido. Igual que en el demo. */
 export function Personalizar({ ajustes, cambiar }: Props) {
-  const [errorLogo, setErrorLogo] = useState('');
-  const [sinVoz, setSinVoz] = useState(false);
-  const hablar = usarVozEspanol();
   const agente = ajustes.agente ?? '';
+  const nombre = NOMBRE_AGENTE[agente];
+  const voces = VOCES_AGENTE[agente];
   const conVoz = AGENTES_CON_VOZ.includes(agente);
-  const subirLogo = (e: ChangeEvent<HTMLInputElement>) => {
-    const archivo = e.target.files?.[0];
-    e.target.value = '';
-    if (!archivo) return;
-    if (!archivo.type.startsWith('image/')) return setErrorLogo('Ese archivo no es una imagen. Elige un PNG, JPG o SVG.');
-    if (archivo.size > MAX_LOGO) return setErrorLogo(`Tu logo pesa ${Math.round(archivo.size / 1024)} KB y el máximo es 200 KB. Prueba con una imagen más chica.`);
-    const lector = new FileReader();
-    lector.onload = () => {
-      setErrorLogo('');
-      cambiar({ logo: String(lector.result) });
-    };
-    lector.onerror = () => setErrorLogo('No se pudo leer la imagen. Prueba con otra.');
-    lector.readAsDataURL(archivo);
-  };
-  const escuchar = () => {
-    const voz = ajustes.voz ?? 'Sol';
-    setSinVoz(!hablar(voz, `Hola${ajustes.tuNombre ? `, ${ajustes.tuNombre}` : ''}. Soy ${voz}, la voz de ${ajustes.nombreApp || 'tu agente'}.`));
-  };
   return (
     <div className="mt-personalizar">
       <div>
@@ -163,46 +113,44 @@ export function Personalizar({ ajustes, cambiar }: Props) {
         <p className="mt-etiqueta">Tu agente</p>
         <div className="mt-chips">
           {OPCIONES_AGENTE.map((a) => (
-            <button type="button" key={a} onClick={() => cambiar({ agente: a })} className={`mt-chip ${agente === a ? 'on' : ''}`}>{NOMBRE_AGENTE[a]}</button>
+            // Al cambiar de agente se olvida la voz: cada uno tiene las suyas.
+            <button type="button" key={a} onClick={() => cambiar({ agente: a, voz: undefined })} className={`mt-chip ${agente === a ? 'on' : ''}`}>{NOMBRE_AGENTE[a]}</button>
           ))}
         </div>
-        <p className="mt-ayuda">{conVoz ? `${NOMBRE_AGENTE[agente]} tiene llamadas de voz: el botón Llamar está en el panel de tu agente.` : agente === 'muse' ? 'Muse no tiene llamadas de voz.' : 'Elige dónde vive tu agente para ver sus llamadas de voz.'}</p>
+        <p className="mt-ayuda">
+          {conVoz
+            ? `${nombre} tiene llamadas de voz: el botón Llamar está en el panel de tu agente.`
+            : agente
+              ? `${nombre} no tiene llamadas de voz.`
+              : 'Elige dónde vive tu agente. También lo puede guardar él mismo (lección 6.3, con guardar_ajustes).'}
+        </p>
       </div>
       {conVoz && (
         <div>
-          <p className="mt-etiqueta">Voz de tu agente</p>
+          <p className="mt-etiqueta">Voz de {nombre}</p>
           <div className="mt-chips">
-            {VOCES.map((v) => (
-              <button type="button" key={v} onClick={() => cambiar({ voz: v })} className={`mt-chip ${(ajustes.voz ?? 'Sol') === v ? 'on' : ''}`}>{v}</button>
+            {voces.map((v) => (
+              <button type="button" key={v} onClick={() => cambiar({ voz: v })} className={`mt-chip ${ajustes.voz === v ? 'on' : ''}`} aria-pressed={ajustes.voz === v}>{v}</button>
             ))}
-            <button type="button" onClick={escuchar} className="mt-chip mt-escuchar"><Icono nombre="Escuchar" lado={12} />Escuchar</button>
           </div>
-          <p className="mt-ayuda">Vista previa del navegador; la voz real la eliges en la app de tu agente.{sinVoz ? ' Este navegador no puede leer en voz alta.' : ''}</p>
+          <p className="mt-ayuda">La voz se escucha en la app de tu agente; aquí solo eliges cuál quieres que use.</p>
+          <a className="mt-chip mt-abrir" href={APP_AGENTE[agente].voz ?? APP_AGENTE[agente].url} target="_blank" rel="noopener noreferrer">Abrir ajustes de voz de {nombre} ↗</a>
         </div>
       )}
       <div>
-        <p className="mt-etiqueta">Logo y sonido</p>
-        <div className="mt-chips" style={{ alignItems: 'center' }}>
-          {ajustes.logo && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img className="mt-logo-muestra" src={ajustes.logo} alt="Tu logo" />
-          )}
-          <label className="mt-chip">
-            {ajustes.logo ? 'Cambiar logo' : 'Subir tu logo'}
-            <input type="file" accept="image/*" onChange={subirLogo} hidden />
-          </label>
-          {ajustes.logo && <button type="button" onClick={() => cambiar({ logo: undefined })} className="mt-chip">Quitar</button>}
-          <button type="button" onClick={() => cambiar({ sonido: !ajustes.sonido })} className="mt-chip">
+        <p className="mt-etiqueta">Sonido</p>
+        <div className="mt-chips">
+          <button type="button" onClick={() => cambiar({ sonido: !ajustes.sonido })} className="mt-chip" aria-pressed={ajustes.sonido}>
             Sonido: {ajustes.sonido ? 'encendido' : 'apagado'}
           </button>
         </div>
-        {errorLogo && <p className="mt-error" role="alert" style={{ marginTop: 8 }}>{errorLogo}</p>}
+        <p className="mt-ayuda">Un clic corto al tocar cualquier botón.</p>
       </div>
     </div>
   );
 }
 
-/* La sección completa: personalización, nombres, tu foto, el ícono de la app y la dirección para conectar al agente. */
+/* La sección completa: personalización, nombres, tu foto, tu logo (que es el ícono de la app) y la dirección para conectar al agente. */
 export default function Ajustes({ ajustes, cambiar, reemplazar, avisar }: PropsCompletas) {
   const [origen, setOrigen] = useState('');
   const [copiada, setCopiada] = useState(false);
@@ -220,7 +168,7 @@ export default function Ajustes({ ajustes, cambiar, reemplazar, avisar }: PropsC
   return (
     <div className="mt-detalle">
       <p className="mt-titulo" style={{ padding: 0 }}>Hazlo tuyo</p>
-      <p className="mt-meta" style={{ padding: 0, marginBottom: 24, fontSize: 13 }}>Color, fondo, agente, voz, logo y sonido. Los cambios se ven al instante y se guardan solos.</p>
+      <p className="mt-meta" style={{ padding: 0, marginBottom: 24, fontSize: 13 }}>Color, fondo, agente, voz y sonido. Los cambios se ven al instante y se guardan solos.</p>
       <Personalizar ajustes={ajustes} cambiar={cambiar} />
 
       <div className="mt-grupo">
@@ -232,7 +180,7 @@ export default function Ajustes({ ajustes, cambiar, reemplazar, avisar }: PropsC
 
       <div className="mt-grupo mt-imagenes">
         <Imagen cual="foto" titulo="Tu foto" ayuda="Se ve arriba, junto a tu nombre. JPG, PNG o WebP de hasta 2 MB." valor={ajustes.foto} lado={256} tipo="image/jpeg" reemplazar={reemplazar} avisar={avisar} />
-        <Imagen cual="icono" titulo="Ícono de tu app" ayuda="El ícono de la pestaña y de la app instalada en el teléfono. Si no subes uno, es la inicial del nombre." valor={ajustes.icono} lado={512} tipo="image/png" reemplazar={reemplazar} avisar={avisar} />
+        <Imagen cual="icono" titulo="Tu logo / ícono de la app" ayuda="Una sola imagen para todo: se ve arriba junto a tu nombre (si no tienes foto), en la pestaña del navegador y como ícono de la app instalada. Si la quitas, vuelve la inicial del nombre." valor={ajustes.icono} lado={512} tipo="image/png" reemplazar={reemplazar} avisar={avisar} />
       </div>
 
       <div className="mt-grupo">

@@ -2,8 +2,7 @@
 import * as acciones from './acciones';
 import { almacen } from './almacen';
 import * as conexiones from './conexiones';
-import { AGENTES, CANALES, ESTADOS, FONDOS } from './tipos';
-import { VOCES } from './tema';
+import { AGENTES, CANALES, ESTADOS, FONDOS, VOCES_AGENTE } from './tipos';
 
 type Entrada = Record<string, unknown>;
 
@@ -177,8 +176,8 @@ export const HERRAMIENTAS: Herramienta[] = [
     inputSchema: { type: 'object', properties: {} },
     ejecutar: async () => {
       // Las imágenes son pesadas: solo se dice si existen.
-      const { logo, foto, icono, ...resto } = await almacen().leerAjustes();
-      return { ...resto, tieneLogo: Boolean(logo), tieneFoto: Boolean(foto), tieneIcono: Boolean(icono) };
+      const { foto, icono, ...resto } = await almacen().leerAjustes();
+      return { ...resto, vocesDisponibles: VOCES_AGENTE[resto.agente ?? ''], tieneFoto: Boolean(foto), tieneIcono: Boolean(icono) };
     },
   },
   {
@@ -192,7 +191,7 @@ export const HERRAMIENTAS: Herramienta[] = [
         tuNombre: { type: 'string', description: 'Cómo se llama la persona, para saludarla.' },
         color: { type: 'string', description: 'Color de acento con formato #rrggbb. Ejemplo: #2f6df6.' },
         fondo: { type: 'string', enum: [...FONDOS], description: 'El fondo del panel.' },
-        voz: { type: 'string', enum: [...VOCES], description: 'La voz elegida.' },
+        voz: { type: 'string', description: `La voz de tu app que la persona quiere usar (se oye en tu app, no en el panel). Dots: ${VOCES_AGENTE.dots.join(', ')}. Grok Bot: ${VOCES_AGENTE.grok.join(', ')}. Muse no tiene voz. Antes tiene que estar elegido el agente.` },
         sonido: { type: 'boolean', description: 'Si los botones suenan al tocarlos.' },
         agente: { type: 'string', enum: AGENTES.filter(Boolean), description: 'En qué agente vives: dots (OpenAI), grok (xAI Grok Bot) o muse (Meta).' },
       },

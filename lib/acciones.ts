@@ -2,8 +2,7 @@
 import { randomBytes } from 'crypto';
 import { almacen } from './almacen';
 import { NOMBRE } from './marca';
-import { VOCES } from './tema';
-import { AGENTES, CANALES, ESTADOS, FONDOS, type Ajustes, type Aprobacion, type Canal, type Correo, type Estado, type Evento, type Rutina, type Tarea } from './tipos';
+import { AGENTES, CANALES, ESTADOS, FONDOS, VOCES_AGENTE, type Agente, type Ajustes, type Aprobacion, type Canal, type Correo, type Estado, type Evento, type Rutina, type Tarea } from './tipos';
 
 /** Un dato que llegó mal. Su mensaje se le muestra tal cual a quien lo mandó. */
 export class ErrorDeDatos extends Error {}
@@ -13,7 +12,6 @@ type Entrada = Record<string, unknown>;
 const nuevoId = () => randomBytes(6).toString('base64url');
 const ahora = () => new Date().toISOString();
 const MAX_ACTIVIDAD = 200;
-const MAX_LOGO = 300_000; // caracteres: una imagen de ~200 KB ya convertida a texto
 
 // ── revisión de datos, a mano ──
 
@@ -235,23 +233,23 @@ export async function guardarEventos(e: Entrada): Promise<Evento[]> {
 
 // ── ajustes ──
 
-/** Guarda los ajustes completos (lo manda la pantalla). La foto y el ícono se suben por /api/foto y /api/icono: aquí se conservan los guardados. */
+/** Guarda los ajustes completos (lo manda la pantalla). La foto y el ícono se suben por /api/foto y /api/icono: aquí se conservan los guardados.
+ *  La voz solo se guarda si es una de las voces de verdad del agente elegido; si no (o si no hay agente), se queda sin voz. */
 export async function guardarAjustes(e: Entrada): Promise<Ajustes> {
   const color = texto(e, 'color', 7);
   if (!/^#[0-9a-fA-F]{6}$/.test(color)) throw new ErrorDeDatos('El color debe tener el formato #rrggbb.');
-  const logo = textoOpcional(e, 'logo', MAX_LOGO);
-  if (logo && !logo.startsWith('data:image/')) throw new ErrorDeDatos('El logo debe ser una imagen.');
   const a = almacen();
   const { foto, icono } = await a.leerAjustes();
+  const agente: Agente | undefined = e.agente === undefined || e.agente === '' ? undefined : opcion(e, 'agente', AGENTES.filter(Boolean));
+  const voz = textoOpcional(e, 'voz', 40);
   const ajustes: Ajustes = compacto({
     nombreApp: textoOpcional(e, 'nombreApp', 40) ?? NOMBRE,
     tuNombre: textoOpcional(e, 'tuNombre', 40) ?? '',
     color,
     fondo: opcion(e, 'fondo', FONDOS),
-    logo,
     sonido: booleano(e, 'sonido'),
-    voz: e.voz === undefined ? 'Sol' : opcion(e, 'voz', VOCES),
-    agente: e.agente === undefined || e.agente === '' ? undefined : opcion(e, 'agente', AGENTES.filter(Boolean)),
+    voz: voz && agente && VOCES_AGENTE[agente].includes(voz) ? voz : undefined,
+    agente,
     foto,
     icono,
   });
@@ -266,6 +264,14 @@ export async function cambiarAjustes(e: Entrada): Promise<Ajustes> {
   if (e.nombre !== undefined) cambios.nombreApp = e.nombre;
   for (const campo of ['nombreApp', 'tuNombre', 'color', 'fondo', 'voz', 'sonido', 'agente']) if (e[campo] !== undefined) cambios[campo] = e[campo];
   if (Object.keys(cambios).length === 0) throw new ErrorDeDatos('Manda al menos un campo: nombre, tuNombre, color, fondo, voz, sonido o agente.');
+  // La voz tiene que ser una de las del agente (el que mande ahora o el ya guardado).
+  if (cambios.voz !== undefined) {
+    const agente = (cambios.agente ?? actual.agente ?? '') as Agente;
+    const voces = VOCES_AGENTE[agente] ?? [];
+    if (!agente) throw new ErrorDeDatos('Primero di en qué agente vives (agente: dots o grok) y luego elige la voz.');
+    if (voces.length === 0) throw new ErrorDeDatos(`${agente} no tiene voces para elegir.`);
+    if (!voces.includes(String(cambios.voz))) throw new ErrorDeDatos(`"voz" debe ser una de las voces de ${agente}: ${voces.join(', ')}.`);
+  }
   const ajustes = await guardarAjustes({ ...actual, ...cambios });
   await anotarActividad(`Cambió los ajustes: ${Object.keys(cambios).map((c) => (c === 'nombreApp' ? 'nombre' : c)).join(', ')}`);
   return ajustes;

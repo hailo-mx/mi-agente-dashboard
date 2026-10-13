@@ -1,4 +1,4 @@
-// GET y PUT de los ajustes (nombre, color, fondo, logo, sonido, voz, agente). La foto y el ícono van por /api/foto y /api/icono.
+// GET y PUT de los ajustes (nombre, color, fondo, sonido, voz, agente). La foto y el logo/ícono van por /api/foto y /api/icono.
 import { guardarAjustes } from '@/lib/acciones';
 import { almacen } from '@/lib/almacen';
 import { cuerpo, responder } from '@/lib/api';
