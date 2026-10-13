@@ -8,7 +8,7 @@ import { AJUSTES_INICIALES, COLECCIONES, type Datos } from './tipos';
 const ARCHIVO = process.env.VERCEL ? '/tmp/mi-agente-datos.json' : path.join(process.cwd(), 'datos', 'datos.json');
 
 function vacio(): Datos {
-  return { tareas: [], rutinas: [], aprobaciones: [], actividad: [], correos: [], eventos: [], ajustes: { ...AJUSTES_INICIALES } };
+  return { tareas: [], rutinas: [], aprobaciones: [], actividad: [], correos: [], eventos: [], conexiones: [], whatsapp: [], ajustes: { ...AJUSTES_INICIALES } };
 }
 
 async function leer(): Promise<Datos> {

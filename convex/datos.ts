@@ -5,7 +5,7 @@
 import { mutationGeneric, queryGeneric } from 'convex/server';
 import { v } from 'convex/values';
 
-const COLECCIONES = ['tareas', 'rutinas', 'aprobaciones', 'actividad', 'correos', 'eventos'] as const;
+const COLECCIONES = ['tareas', 'rutinas', 'aprobaciones', 'actividad', 'correos', 'eventos', 'conexiones', 'whatsapp'] as const;
 
 const coleccion = v.union(
   v.literal('tareas'),
@@ -14,6 +14,8 @@ const coleccion = v.union(
   v.literal('actividad'),
   v.literal('correos'),
   v.literal('eventos'),
+  v.literal('conexiones'),
+  v.literal('whatsapp'),
 );
 
 function revisarClave(clave: string) {

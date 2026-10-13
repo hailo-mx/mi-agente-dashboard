@@ -102,6 +102,43 @@ Son las que aparecen en `tools/list` (están definidas en `lib/herramientas.ts`)
 - `guardar_correos` — Sustituye el resumen de tu bandeja de entrada por la lista que mande.
 - `guardar_eventos` — Sustituye los eventos del calendario dentro de un rango de fechas.
 - `leer_ajustes` — Devuelve el nombre del panel y tu nombre, para que te hable por tu nombre.
+- `listar_conexiones` — Dice qué cuentas tienes conectadas (Google, Microsoft 365, WhatsApp) y cuándo se sincronizaron.
+- `sincronizar_correo_y_calendario` — Trae a tu panel los últimos 20 hilos de tu bandeja y los eventos de los próximos 7 días de las cuentas conectadas.
+- `enviar_correo` — Manda un correo de verdad desde tu cuenta. Solo con el `aprobacion_id` de una aprobación que tú ya aprobaste.
+- `crear_evento` — Crea un evento de verdad en tu calendario. Solo con una aprobación aprobada.
+- `enviar_whatsapp` — Manda un WhatsApp desde tu número de WhatsApp Business. Solo con una aprobación aprobada.
+
+Las tres últimas pasan la aprobación a «hecha» al terminar: cada aprobación sirve una sola vez.
+
+## Conexiones: tu correo, tu calendario y WhatsApp de verdad
+
+En la sección **Conexiones** del panel conectas tus cuentas. Con eso, el panel (y tu agente a través de él) puede leer tu bandeja de entrada y tu calendario y, cuando tú lo apruebes, mandar correos, crear eventos y mandar WhatsApps.
+
+- **Google** (Gmail + Google Calendar) y **Microsoft 365** (Outlook + Calendario): tocas **Conectar**, das permiso en la pantalla de Google o Microsoft y listo. El panel guarda un permiso permanente (nunca tu contraseña). **Sincronizar ahora** trae los últimos 20 hilos y la semana que viene; **Desconectar** lo olvida.
+- **WhatsApp**: tu WhatsApp personal no se puede conectar (WhatsApp no lo permite). Se conecta un número de **WhatsApp Business** por la plataforma de Meta. Si tu agente ya tiene su propio conector de WhatsApp, este paso es opcional.
+
+Para que los botones funcionen hacen falta unas llaves (variables de entorno). Cada tarjeta tiene un apartado **«¿Cómo consigo las llaves?»** con los pasos, y el archivo `.env.example` las lista todas:
+
+| Variable | Para qué |
+| --- | --- |
+| `APP_URL` | La dirección pública de tu panel (ej. `https://tu-panel.vercel.app`). |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google Cloud → credenciales OAuth de aplicación web. |
+| `MS_CLIENT_ID`, `MS_CLIENT_SECRET` | Azure → App registration. |
+| `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID`, `WHATSAPP_VERIFY_TOKEN` | Meta for Developers → WhatsApp. |
+
+Si no quieres hacerlo a mano, pídeselo a tu ayudante de programación (Claude Code, Codex o el que uses). Copia y pega este mensaje, cambiando la dirección por la de tu panel:
+
+```text
+Ayúdame a conectar Google (Gmail y Google Calendar) a mi panel "Mi Agente", que está publicado en Vercel en https://tu-panel.vercel.app y cuyo código está en esta carpeta.
+
+1. Usa la CLI de Google Cloud (gcloud) si está instalada; si no, instálala o guíame paso a paso con capturas de lo que debo hacer en console.cloud.google.com. Necesito: un proyecto nuevo, las APIs "Gmail API" y "Google Calendar API" habilitadas, una pantalla de consentimiento OAuth de tipo Externo con mi correo como usuario de prueba, y un ID de cliente OAuth de tipo "Aplicación web" con este URI de redirección exacto: https://tu-panel.vercel.app/api/conexiones/google/callback
+2. Con el ID y el secreto que salgan, usa la CLI de Vercel (vercel env add) para poner en producción las variables GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET y APP_URL=https://tu-panel.vercel.app. No me pidas que los pegue yo en ningún chat ni los guardes en archivos del repositorio.
+3. Vuelve a desplegar (vercel --prod) y dime cuando pueda entrar a https://tu-panel.vercel.app/conexiones y tocar "Conectar".
+
+Si en algún paso necesitas que yo haga clic en algo, dime exactamente dónde. Si también quieres, haz lo mismo para Microsoft 365 (App registration en Azure, redirect URI https://tu-panel.vercel.app/api/conexiones/microsoft/callback, variables MS_CLIENT_ID y MS_CLIENT_SECRET).
+```
+
+Mientras la app de Google esté «en pruebas» (lo normal para uso personal), Google te avisa que la app no está verificada: toca «Avanzado» → «Ir a … (no seguro)». Es tu propia app, no pasa nada.
 
 ## Rutas de la página (por si las necesitas)
 
@@ -110,5 +147,10 @@ Son las que aparecen en `tools/list` (están definidas en `lib/herramientas.ts`)
 - `POST /api/tareas` — agregar una tarea a mano.
 - `PATCH /api/tareas/:id`, `/api/rutinas/:id`, `/api/aprobaciones/:id` — marcar hecha, encender/apagar, aprobar o rechazar.
 - `GET` y `PUT /api/ajustes` — nombre, color, fondo, logo y sonido.
+- `GET /api/conexiones` — el estado de tus cuentas conectadas (nunca devuelve las llaves).
+- `GET /api/conexiones/google/iniciar`, `/callback` (igual con `microsoft`) — el flujo de permiso; los usa el navegador.
+- `POST /api/conexiones/google/sincronizar`, `/desconectar` (igual con `microsoft`) y `POST /api/conexiones/sincronizar` (todas).
+- `POST /api/conexiones/enviar-correo`, `/crear-evento`, `/enviar-whatsapp` — lo mismo que las herramientas MCP; piden `aprobacion_id`.
+- `GET` y `POST /api/conexiones/whatsapp/webhook` — lo llama Meta; no lleva clave.
 
 Con `CLAVE_AGENTE` puesta, estas rutas aceptan la cookie del navegador o el mismo encabezado `Authorization: Bearer`.

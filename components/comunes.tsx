@@ -1,13 +1,13 @@
 'use client';
 import type { ReactNode } from 'react';
 
-export type Seccion = 'Inicio' | 'Calendario' | 'Correos' | 'Tareas' | 'Rutinas' | 'Aprobaciones' | 'Ajustes';
+export type Seccion = 'Inicio' | 'Calendario' | 'Correos' | 'Tareas' | 'Rutinas' | 'Aprobaciones' | 'Conexiones' | 'Ajustes';
 export type Vista = Seccion | 'Más';
 
-export const SECCIONES: Seccion[] = ['Inicio', 'Calendario', 'Correos', 'Tareas', 'Rutinas', 'Aprobaciones', 'Ajustes'];
-/* En el teléfono: cinco pestañas abajo; "Más" guarda las otras tres secciones. */
+export const SECCIONES: Seccion[] = ['Inicio', 'Calendario', 'Correos', 'Tareas', 'Rutinas', 'Aprobaciones', 'Conexiones', 'Ajustes'];
+/* En el teléfono: cinco pestañas abajo; "Más" guarda las otras cuatro secciones. */
 export const PESTANAS: Vista[] = ['Inicio', 'Correos', 'Aprobaciones', 'Tareas', 'Más'];
-export const EN_MAS: Seccion[] = ['Calendario', 'Rutinas', 'Ajustes'];
+export const EN_MAS: Seccion[] = ['Calendario', 'Rutinas', 'Conexiones', 'Ajustes'];
 
 const ICONOS: Record<string, string> = {
   Inicio: 'M4 11l8-7 8 7v8a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1z',
@@ -16,6 +16,7 @@ const ICONOS: Record<string, string> = {
   Tareas: 'M5 12l4 4 10-10',
   Rutinas: 'M12 7v5l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z',
   Aprobaciones: 'M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3zm-3 9l2 2 4-4',
+  Conexiones: 'M10 13a5 5 0 007.07 0l2.83-2.83a5 5 0 00-7.07-7.07L11.5 4.4M14 11a5 5 0 00-7.07 0l-2.83 2.83a5 5 0 007.07 7.07l1.33-1.3',
   Ajustes: 'M4 7h9m4 0h3M4 17h3m4 0h9M15 5v4M9 15v4',
   Más: 'M5 12h.01M12 12h.01M19 12h.01',
   Atrás: 'M15 5l-7 7 7 7',

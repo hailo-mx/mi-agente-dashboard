@@ -4,6 +4,7 @@ out/
 # Tus datos locales (tareas, correos, etc.). No se suben a GitHub.
 datos/
 .env*
+!.env.example
 .vercel
 next-env.d.ts
 *.tsbuildinfo

@@ -300,8 +300,8 @@ button.chip.on { border-color: transparent; background: rgba(255, 255, 255, 0.2)
 .cal-ev small { display: block; font-size: 10px; font-weight: 400; opacity: 0.85; }
 .cal-ev.on { box-shadow: 0 0 0 2px #fff; z-index: 1; }
 
-/* ── ajustes ── */
-.ajustes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-content: start; }
+/* ── ajustes y conexiones ── */
+.ajustes, .conexiones { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-content: start; }
 .grupo { padding: 18px; border-radius: 20px; background: rgba(0, 0, 0, 0.22); }
 .rotulo { display: block; margin: 14px 0 8px; font-size: 13px; font-weight: 600; }
 .rotulo:first-child, .rotulo.sin-margen { margin-top: 0; }
@@ -319,6 +319,16 @@ button.chip.on { border-color: transparent; background: rgba(255, 255, 255, 0.2)
 .logo-muestra { width: 48px; height: 48px; border-radius: 999px; object-fit: cover; background: rgba(255, 255, 255, 0.1); }
 .direccion { flex: 1; min-width: 0; padding: 10px 12px; border-radius: 12px; background: rgba(0, 0, 0, 0.3); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; overflow-wrap: anywhere; user-select: all; }
 .grupo .tenue.chico { margin: 6px 0 10px; }
+
+/* ── conexiones ── */
+.conexion-cabeza { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.conexion-cabeza h2 { font-size: 17px; font-weight: 650; }
+.conexion .botones { margin-top: 12px; }
+.pasos { margin-top: 12px; border-top: 1px solid var(--linea); padding-top: 10px; }
+.pasos summary { cursor: pointer; font-size: 13.5px; font-weight: 600; color: var(--tenue); }
+.pasos summary:hover { color: #fff; }
+.pasos ol { margin: 10px 0 0; padding-left: 20px; font-size: 13.5px; display: flex; flex-direction: column; gap: 6px; }
+.pasos code { padding: 1px 6px; border-radius: 6px; background: rgba(0, 0, 0, 0.3); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; overflow-wrap: anywhere; }
 
 /* ── la puerta (pedir la clave) ── */
 .puerta-caja { display: flex; flex-direction: column; gap: 14px; width: min(100%, 400px); padding: 30px; }
@@ -353,7 +363,7 @@ button.chip.on { border-color: transparent; background: rgba(255, 255, 255, 0.2)
   /* Inicio no tiene detalle: se ve todo, uno debajo del otro */
   .cuerpo.inicio > .lista { padding-bottom: 0; }
 
-  .ajustes { grid-template-columns: minmax(0, 1fr); }
+  .ajustes, .conexiones { grid-template-columns: minmax(0, 1fr); }
   .saludo h2 { font-size: 25px; }
   .cuenta { padding: 12px; }
   .cuenta strong { font-size: 26px; }

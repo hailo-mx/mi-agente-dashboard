@@ -6,16 +6,17 @@ import { EN_MAS, Icono, PESTANAS, SECCIONES, clic, type Seccion, type Vista } fr
 import { Aprobaciones, Correos, Inicio, Rutinas, Tareas } from './Secciones';
 import Calendario from './Calendario';
 import Ajustes from './Ajustes';
+import Conexiones from './Conexiones';
 
 type Todo = Datos & { sinNube: boolean };
 export type Mandar = (ruta: string, metodo: 'POST' | 'PATCH', cuerpo: object) => Promise<boolean>;
 
 const CADA = 5000; // cada cuánto se revisa si el agente escribió algo nuevo
 
-export default function Panel({ ajustesIniciales }: { ajustesIniciales: TipoAjustes }) {
+export default function Panel({ ajustesIniciales, vistaInicial = 'Inicio' }: { ajustesIniciales: TipoAjustes; vistaInicial?: Vista }) {
   const [datos, setDatos] = useState<Todo | null>(null);
   const [ajustes, setAjustes] = useState(ajustesIniciales);
-  const [vista, setVista] = useState<Vista>('Inicio');
+  const [vista, setVista] = useState<Vista>(vistaInicial);
   const [elegidos, setElegidos] = useState<Partial<Record<Seccion, string>>>({});
   // Solo importa en el teléfono: si se está viendo el detalle en lugar de la lista.
   const [abierto, setAbierto] = useState(false);
@@ -188,6 +189,8 @@ export default function Panel({ ajustesIniciales }: { ajustesIniciales: TipoAjus
           <Correos correos={datos.correos} elegido={elegidos.Correos} elegir={(id) => elegir('Correos', id)} abierto={abierto} />
         ) : vista === 'Calendario' ? (
           <Calendario eventos={datos.eventos} />
+        ) : vista === 'Conexiones' ? (
+          <Conexiones avisar={avisar} />
         ) : vista === 'Ajustes' ? (
           <Ajustes ajustes={ajustes} cambiar={cambiarAjustes} />
         ) : (

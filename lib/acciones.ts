@@ -20,14 +20,14 @@ function objeto(valor: unknown, que: string): Entrada {
   return valor as Entrada;
 }
 
-function texto(e: Entrada, campo: string, max = 4000): string {
+export function texto(e: Entrada, campo: string, max = 4000): string {
   const valor = e[campo];
   if (typeof valor !== 'string' || !valor.trim()) throw new ErrorDeDatos(`Falta "${campo}" (debe ser un texto).`);
   if (valor.length > max) throw new ErrorDeDatos(`"${campo}" es demasiado largo (máximo ${max} caracteres).`);
   return valor.trim();
 }
 
-function textoOpcional(e: Entrada, campo: string, max = 4000): string | undefined {
+export function textoOpcional(e: Entrada, campo: string, max = 4000): string | undefined {
   const valor = e[campo];
   if (valor === undefined || valor === null || valor === '') return undefined;
   return texto(e, campo, max);
@@ -54,7 +54,7 @@ function lista(e: Entrada, campo: string, max = 500): unknown[] {
 }
 
 /** Fecha con hora en formato ISO, por ejemplo 2026-03-09T10:00:00-06:00. Se guarda normalizada. */
-function fechaHora(e: Entrada, campo: string): string {
+export function fechaHora(e: Entrada, campo: string): string {
   const valor = texto(e, campo, 40);
   const ms = Date.parse(valor);
   if (!/^\d{4}-\d{2}-\d{2}T/.test(valor) || Number.isNaN(ms)) throw new ErrorDeDatos(`"${campo}" debe ser una fecha con hora en formato ISO, por ejemplo 2026-03-09T10:00:00-06:00.`);
@@ -69,7 +69,7 @@ function dia(e: Entrada, campo: string): string | undefined {
 }
 
 /** Quita los campos sin valor para no guardar "undefined". */
-function compacto<T extends object>(o: T): T {
+export function compacto<T extends object>(o: T): T {
   return Object.fromEntries(Object.entries(o).filter(([, valor]) => valor !== undefined)) as T;
 }
 

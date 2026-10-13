@@ -27,9 +27,19 @@ export type Aprobacion = {
 
 export type Actividad = { id: string; texto: string; cuando: string };
 
-export type Correo = { id: string; de: string; asunto: string; resumen: string; recibido: string; necesitaRespuesta: boolean; borrador?: string };
+/** idProveedor: el id que le da Gmail/Outlook/Meta, para no duplicar al sincronizar. */
+export type Correo = { id: string; de: string; asunto: string; resumen: string; recibido: string; necesitaRespuesta: boolean; borrador?: string; idProveedor?: string };
 
-export type Evento = { id: string; titulo: string; inicio: string; fin: string; nota?: string };
+export type Evento = { id: string; titulo: string; inicio: string; fin: string; nota?: string; idProveedor?: string };
+
+export const PROVEEDORES = ['google', 'microsoft'] as const;
+export type Proveedor = (typeof PROVEEDORES)[number];
+
+/** Una cuenta conectada (Gmail o Outlook). El refreshToken nunca sale del servidor. */
+export type Conexion = { id: string; proveedor: Proveedor; correo: string; refreshToken: string; conectada: string; ultimaSync?: string };
+
+/** Un mensaje de WhatsApp que llegó al número de Meta. */
+export type Whatsapp = { id: string; idProveedor: string; de: string; nombre?: string; texto: string; recibido: string };
 
 export const FONDOS = ['calido', 'noche', 'aurora', 'grafito'] as const;
 export type Fondo = (typeof FONDOS)[number];
@@ -43,9 +53,11 @@ export type Colecciones = {
   actividad: Actividad;
   correos: Correo;
   eventos: Evento;
+  conexiones: Conexion;
+  whatsapp: Whatsapp;
 };
 export type Coleccion = keyof Colecciones;
-export const COLECCIONES: Coleccion[] = ['tareas', 'rutinas', 'aprobaciones', 'actividad', 'correos', 'eventos'];
+export const COLECCIONES: Coleccion[] = ['tareas', 'rutinas', 'aprobaciones', 'actividad', 'correos', 'eventos', 'conexiones', 'whatsapp'];
 
 export type Datos = { [C in Coleccion]: Colecciones[C][] } & { ajustes: Ajustes };
 

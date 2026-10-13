@@ -46,6 +46,7 @@ export default defineSchema({
     recibido: v.string(),
     necesitaRespuesta: v.boolean(),
     borrador: v.optional(v.string()),
+    idProveedor: v.optional(v.string()),
   }).index('por_id', ['id']),
 
   eventos: defineTable({
@@ -54,6 +55,25 @@ export default defineSchema({
     inicio: v.string(),
     fin: v.string(),
     nota: v.optional(v.string()),
+    idProveedor: v.optional(v.string()),
+  }).index('por_id', ['id']),
+
+  conexiones: defineTable({
+    id: v.string(),
+    proveedor: v.union(v.literal('google'), v.literal('microsoft')),
+    correo: v.string(),
+    refreshToken: v.string(),
+    conectada: v.string(),
+    ultimaSync: v.optional(v.string()),
+  }).index('por_id', ['id']),
+
+  whatsapp: defineTable({
+    id: v.string(),
+    idProveedor: v.string(),
+    de: v.string(),
+    nombre: v.optional(v.string()),
+    texto: v.string(),
+    recibido: v.string(),
   }).index('por_id', ['id']),
 
   // Un solo documento.

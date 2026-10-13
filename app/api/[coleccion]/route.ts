@@ -1,4 +1,5 @@
-// GET /api/tareas, /api/rutinas, /api/aprobaciones, /api/actividad, /api/correos, /api/eventos
+// GET /api/tareas, /api/rutinas, /api/aprobaciones, /api/actividad, /api/correos, /api/eventos, /api/whatsapp
+// (/api/conexiones tiene su propia ruta: nunca devuelve los tokens)
 // POST /api/tareas  → agregar una tarea a mano
 import { ErrorDeDatos, crearTarea } from '@/lib/acciones';
 import { almacen } from '@/lib/almacen';
@@ -12,7 +13,7 @@ type Contexto = { params: { coleccion: string } };
 const noExiste = () => Response.json({ error: 'Esa ruta no existe.' }, { status: 404 });
 
 export async function GET(peticion: Request, { params }: Contexto) {
-  if (!COLECCIONES.includes(params.coleccion as Coleccion)) return noExiste();
+  if (!COLECCIONES.includes(params.coleccion as Coleccion) || params.coleccion === 'conexiones') return noExiste();
   return responder(peticion, () => almacen().listar(params.coleccion as Coleccion));
 }
 
