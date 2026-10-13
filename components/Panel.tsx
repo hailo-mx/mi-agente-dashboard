@@ -364,7 +364,7 @@ export default function Panel({ ajustesIniciales, vistaInicial = 'Inicio' }: { a
     <div className="mt-bandas">
       {d?.sinNube && (
         <div className="mt-banda alerta" role="alert">
-          <strong>Tus datos todavía no se guardan.</strong> Este panel está publicado en internet sin base de datos en la nube: lo que anotes aquí puede borrarse en cualquier momento. Conecta Convex siguiendo los pasos del archivo LEEME.md.
+          <strong>Tus datos todavía no se guardan.</strong> Este panel está publicado en internet sin base de datos en la nube: lo que anotes aquí puede borrarse en cualquier momento. Agrega un store de Vercel Blob (o Convex) siguiendo los pasos del archivo LEEME.md.
         </div>
       )}
       {falla && <div className="mt-banda alerta" role="alert">{falla}</div>}

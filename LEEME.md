@@ -78,14 +78,25 @@ Debe regresar la lista de herramientas. Sin el encabezado de la clave, contesta 
 
 ## Publicarlo en internet (Vercel)
 
+La forma fácil es el botón. Te pide una cuenta de Vercel (gratis), copia este repositorio al tuyo de GitHub, te pregunta tu `CLAVE_AGENTE` y crea solo un **store de Vercel Blob** donde se guardan tus datos:
+
+[![Desplegar con Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fhailo-mx%2Fmi-agente-dashboard&project-name=mi-agente&repository-name=mi-agente&env=CLAVE_AGENTE&envDescription=Una%20clave%20larga%20que%20solo%20t%C3%BA%20conozcas%3A%20con%20ella%20entran%20t%C3%BA%20y%20tu%20agente.&stores=%5B%7B%22type%22%3A%22blob%22%7D%5D)
+
+Si prefieres hacerlo a mano:
+
 1. Sube la carpeta a un repositorio de GitHub.
 2. En https://vercel.com crea un proyecto nuevo e importa ese repositorio. Vercel detecta Next.js solo.
 3. Antes de desplegar, en **Settings → Environment Variables** agrega `CLAVE_AGENTE` con una clave larga que solo tú conozcas.
-4. Despliega. Tu panel queda en `https://tu-panel.vercel.app`.
+4. En **Storage → Create Database → Blob** crea un store y conéctalo al proyecto. Eso deja la variable `BLOB_READ_WRITE_TOKEN` en el proyecto (no la escribas tú).
+5. Despliega. Tu panel queda en `https://tu-panel.vercel.app`.
 
-Ojo: en Vercel el archivo `datos/datos.json` **no se conserva** (el servidor se reinicia seguido y lo borra). El panel te lo avisa con una franja amarilla. Para que tus datos vivan en internet, sigue el siguiente paso.
+### Dónde se guardan los datos
 
-## Guardar los datos en la nube (Convex)
+- **Vercel Blob** (`BLOB_READ_WRITE_TOKEN`): todo el panel vive en un solo archivo JSON privado dentro de tu store. Es lo que deja el botón y no hay que configurar nada más. Es suficiente para un panel personal.
+- **Convex** (`CONVEX_URL`): una base de datos de verdad, opcional, para cuando quieras más (varios agentes escribiendo a la vez, consultas, etc.). Si existe `CONVEX_URL`, el panel la usa en lugar de Blob. Los pasos están en la siguiente sección.
+- **Sin ninguna de las dos**: en tu computadora se usa `datos/datos.json`; en Vercel ese archivo **no se conserva** (el servidor se reinicia seguido y lo borra) y el panel te lo avisa con una franja amarilla.
+
+## Guardar los datos en Convex (opcional)
 
 Convex es una base de datos gratuita para proyectos chicos. Solo se hace una vez:
 
@@ -115,7 +126,7 @@ Convex es una base de datos gratuita para proyectos chicos. Solo se hace una vez
 
 5. En Vercel, en **Settings → Environment Variables**, agrega `CONVEX_URL` con esa dirección y vuelve a desplegar.
 
-Listo: en cuanto existe `CONVEX_URL`, el panel guarda todo en Convex y la franja amarilla desaparece. En tu computadora pasa lo mismo con el `NEXT_PUBLIC_CONVEX_URL` que quedó en `.env.local`; agrega ahí también `CLAVE_AGENTE=tu-clave-secreta` para que el panel pueda hablar con Convex.
+Listo: en cuanto existe `CONVEX_URL`, el panel guarda todo en Convex (aunque también exista `BLOB_READ_WRITE_TOKEN`) y la franja amarilla desaparece. En tu computadora pasa lo mismo con el `NEXT_PUBLIC_CONVEX_URL` que quedó en `.env.local`; agrega ahí también `CLAVE_AGENTE=tu-clave-secreta` para que el panel pueda hablar con Convex.
 
 ## Herramientas que ve tu agente
 

@@ -1,8 +1,10 @@
-// El almacén: una sola interfaz y dos lugares donde guardar.
-//  - Local (por defecto): el archivo datos/datos.json en tu computadora.
+// El almacén: una sola interfaz y tres lugares donde guardar.
 //  - Convex: una base de datos en la nube, cuando existe la variable CONVEX_URL.
+//  - Vercel Blob: un archivo JSON en el store de Blob, cuando existe BLOB_READ_WRITE_TOKEN.
+//  - Local (por defecto): el archivo datos/datos.json en tu computadora.
 import type { Ajustes, Coleccion, Colecciones, Datos } from './tipos';
 import { almacenLocal } from './almacen-local';
+import { almacenBlob } from './almacen-blob';
 import { crearAlmacenConvex } from './almacen-convex';
 
 export interface Almacen {
@@ -22,16 +24,20 @@ export function urlConvex(): string | undefined {
   return process.env.CONVEX_URL || process.env.NEXT_PUBLIC_CONVEX_URL || undefined;
 }
 
-/** Publicado en Vercel sin base de datos en la nube: lo que se escriba no se conserva. */
+export function hayBlob(): boolean {
+  return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+}
+
+/** Publicado en Vercel sin Convex ni Blob: lo que se escriba no se conserva. */
 export function sinNube(): boolean {
-  return Boolean(process.env.VERCEL) && !urlConvex();
+  return Boolean(process.env.VERCEL) && !urlConvex() && !hayBlob();
 }
 
 let convex: { url: string; almacen: Almacen } | undefined;
 
 export function almacen(): Almacen {
   const url = urlConvex();
-  if (!url) return almacenLocal;
+  if (!url) return hayBlob() ? almacenBlob : almacenLocal;
   if (convex?.url !== url) convex = { url, almacen: crearAlmacenConvex(url) };
   return convex.almacen;
 }
