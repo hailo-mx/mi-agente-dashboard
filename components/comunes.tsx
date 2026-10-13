@@ -1,30 +1,32 @@
 'use client';
 import type { ReactNode } from 'react';
 
-export type Seccion = 'Inicio' | 'Calendario' | 'Correos' | 'Tareas' | 'Rutinas' | 'Aprobaciones' | 'Conexiones' | 'Ajustes';
+/* Las secciones, en el orden del riel. */
+export const NAV = ['Inicio', 'Calendario', 'Correos', 'WhatsApp', 'Tareas', 'Rutinas', 'Aprobaciones', 'Conexiones', 'Ajustes'] as const;
+export type Seccion = (typeof NAV)[number];
 export type Vista = Seccion | 'Más';
-
-export const SECCIONES: Seccion[] = ['Inicio', 'Calendario', 'Correos', 'Tareas', 'Rutinas', 'Aprobaciones', 'Conexiones', 'Ajustes'];
-/* En el teléfono: cinco pestañas abajo; "Más" guarda las otras cuatro secciones. */
-export const PESTANAS: Vista[] = ['Inicio', 'Correos', 'Aprobaciones', 'Tareas', 'Más'];
-export const EN_MAS: Seccion[] = ['Calendario', 'Rutinas', 'Conexiones', 'Ajustes'];
+/* En el teléfono: cinco pestañas abajo; "Más" guarda el resto. */
+export const PESTANAS = ['Inicio', 'Correos', 'Agente', 'WhatsApp', 'Más'] as const;
+export const EN_MAS: Seccion[] = ['Calendario', 'Tareas', 'Rutinas', 'Aprobaciones', 'Conexiones', 'Ajustes'];
 
 const ICONOS: Record<string, string> = {
   Inicio: 'M4 11l8-7 8 7v8a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1z',
   Calendario: 'M5 6h14a1 1 0 011 1v11a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1zm0 4h14M9 4v4m6-4v4',
   Correos: 'M4 7l8 6 8-6M5 6h14a1 1 0 011 1v10a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1z',
+  WhatsApp: 'M21 12a8 8 0 01-11.8 7L4 20l1.1-4.6A8 8 0 1121 12z',
   Tareas: 'M5 12l4 4 10-10',
   Rutinas: 'M12 7v5l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z',
   Aprobaciones: 'M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3zm-3 9l2 2 4-4',
   Conexiones: 'M10 13a5 5 0 007.07 0l2.83-2.83a5 5 0 00-7.07-7.07L11.5 4.4M14 11a5 5 0 00-7.07 0l-2.83 2.83a5 5 0 007.07 7.07l1.33-1.3',
   Ajustes: 'M4 7h9m4 0h3M4 17h3m4 0h9M15 5v4M9 15v4',
   Más: 'M5 12h.01M12 12h.01M19 12h.01',
-  Atrás: 'M15 5l-7 7 7 7',
-  Adelante: 'M9 5l7 7-7 7',
-  Cerrar: 'M6 6l12 12M18 6L6 18',
+  Agente: 'M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z',
+  SonidoOn: 'M4 10v4h3l5 4V6L7 10zm12-1a4 4 0 010 6m2.5-9a8 8 0 010 12',
+  SonidoOff: 'M4 10v4h3l5 4V6L7 10zm12 0l5 5m0-5l-5 5',
+  Enviar: 'M5 12l14-7-5 14-3-6z',
 };
 
-export function Icono({ nombre, lado = 20 }: { nombre: string; lado?: number }) {
+export function Icono({ nombre, lado = 18 }: { nombre: string; lado?: number }) {
   return (
     <svg width={lado} height={lado} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={nombre === 'Más' ? 2.6 : 1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <path d={ICONOS[nombre]} />
@@ -32,33 +34,32 @@ export function Icono({ nombre, lado = 20 }: { nombre: string; lado?: number }) 
   );
 }
 
-/* Un renglón de cualquier lista: inicial, título, segunda línea y algo a la derecha. */
-export function Fila({ titulo, linea, derecha, punto, elegida, onClick }: { titulo: string; linea?: string; derecha?: ReactNode; punto?: boolean; elegida?: boolean; onClick?: () => void }) {
+/* Tu agente no tiene cara aquí (vive en Dots, Grok Bot o Muse): una chispa del color de acento. */
+export function Avatar({ lado = 44 }: { lado?: number }) {
   return (
-    <button type="button" className={`fila ${elegida ? 'on' : ''}`} onClick={onClick}>
-      <span className="inicial" aria-hidden>{(titulo.trim()[0] ?? '·').toUpperCase()}</span>
-      <span className="fila-texto">
-        <span className="fila-titulo">{titulo}</span>
-        {linea && <span className="fila-linea">{linea}</span>}
+    <span className="mt-avatar" style={{ width: lado, height: lado }} aria-hidden>
+      <Icono nombre="Agente" lado={Math.round(lado * 0.52)} />
+    </span>
+  );
+}
+
+/* Un renglón de cualquier lista: inicial, título, segunda línea y algo a la derecha. */
+export function Fila({ a, b, c, on, punto, onClick }: { a: string; b?: string; c?: ReactNode; on?: boolean; punto?: boolean; onClick?: () => void }) {
+  return (
+    <button type="button" onClick={onClick} className={`mt-fila ${on ? 'on' : ''}`}>
+      <span className="mt-fila-ini" aria-hidden>{(a.trim()[0] ?? '·').toUpperCase()}</span>
+      <span className="mt-fila-texto">
+        <span className="mt-fila-a">{a}</span>
+        {b && <span className="mt-fila-b">{b}</span>}
       </span>
-      {derecha}
-      {punto && <span className="punto" aria-label="Pendiente" />}
+      {c}
+      {punto && <span className="mt-punto" aria-label="Pendiente" />}
     </button>
   );
 }
 
 export function Vacio({ children }: { children: ReactNode }) {
-  return <p className="vacio">{children}</p>;
-}
-
-/* Dos columnas en computadora (lista y detalle); en teléfono, una pantalla a la vez. */
-export function DosColumnas({ abierto, lista, detalle, hayLista }: { abierto: boolean; lista: ReactNode; detalle: ReactNode; hayLista: boolean }) {
-  return (
-    <div className="cuerpo dos" data-abierto={abierto}>
-      <div className="lista">{lista}</div>
-      <div className="detalle">{detalle ?? (hayLista ? <Vacio>Elige algo de la lista para verlo aquí.</Vacio> : null)}</div>
-    </div>
-  );
+  return <p className="mt-vacio">{children}</p>;
 }
 
 let audio: AudioContext | null = null;
@@ -76,7 +77,7 @@ export function clic() {
       o.frequency.setValueAtTime(880, t);
       o.frequency.exponentialRampToValueAtTime(520, t + 0.07);
       g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.25, t + 0.006);
+      g.gain.exponentialRampToValueAtTime(0.32, t + 0.006);
       g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
       o.connect(g).connect(ctx.destination);
       o.start(t);

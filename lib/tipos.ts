@@ -1,4 +1,5 @@
 // Todo lo que guarda el panel. Los id son textos cortos al azar y las fechas van en formato ISO.
+import { COLOR, NOMBRE } from './marca';
 
 export type Tarea = { id: string; titulo: string; fecha?: string; hecha: boolean; creada: string };
 
@@ -44,7 +45,7 @@ export type Whatsapp = { id: string; idProveedor: string; de: string; nombre?: s
 export const FONDOS = ['calido', 'noche', 'aurora', 'grafito'] as const;
 export type Fondo = (typeof FONDOS)[number];
 
-export type Ajustes = { nombreApp: string; tuNombre: string; color: string; fondo: Fondo; logo?: string; sonido: boolean };
+export type Ajustes = { nombreApp: string; tuNombre: string; color: string; fondo: Fondo; logo?: string; sonido: boolean; voz?: string };
 
 export type Colecciones = {
   tareas: Tarea;
@@ -61,7 +62,8 @@ export const COLECCIONES: Coleccion[] = ['tareas', 'rutinas', 'aprobaciones', 'a
 
 export type Datos = { [C in Coleccion]: Colecciones[C][] } & { ajustes: Ajustes };
 
-export const AJUSTES_INICIALES: Ajustes = { nombreApp: 'Mi Agente', tuNombre: '', color: '#2f6df6', fondo: 'calido', sonido: true };
+/** Con lo que arranca el panel. El nombre y el color salen de lib/marca.ts. */
+export const AJUSTES_INICIALES: Ajustes = { nombreApp: NOMBRE, tuNombre: '', color: COLOR, fondo: 'calido', sonido: true, voz: 'Sol' };
 
 /** El color del fondo de cada tema, para la barra del navegador y la pantalla de arranque. */
 export const COLOR_FONDO: Record<Fondo, string> = { calido: '#0c0a0a', noche: '#05070f', aurora: '#07060c', grafito: '#09090b' };

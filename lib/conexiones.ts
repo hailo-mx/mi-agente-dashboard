@@ -1,6 +1,6 @@
 // Las cuentas conectadas: estado, sincronizar correo y calendario, y mandar cosas (solo con una aprobación).
 import { randomBytes } from 'crypto';
-import { ErrorDeDatos, anotarActividad, compacto, fechaHora, texto, textoOpcional } from './acciones';
+import { ErrorDeDatos, anotarActividad, compacto, fechaHora, opcion, texto, textoOpcional } from './acciones';
 import { almacen } from './almacen';
 import type { Cuenta } from './cuentas';
 import { google } from './google';
@@ -201,4 +201,31 @@ export async function guardarMensajesWhatsapp(cuerpo: unknown) {
   const agregar = nuevos.filter((n) => !vistos.has(n.idProveedor));
   if (agregar.length) await a.reemplazar('whatsapp', [...actuales, ...agregar].slice(-200));
   return agregar.length;
+}
+
+// ── responder desde la pantalla (Correos y WhatsApp) ──
+
+const ES_CORREO = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/;
+
+/** Tú escribes (o apruebas el borrador) desde el panel: queda una aprobación ya "aprobada" y,
+ *  si hay una cuenta conectada para ese canal, se manda de inmediato. Si no, la manda tu agente
+ *  en su siguiente revisión (la ve con listar_aprobaciones estado=aprobada). */
+export async function enviarDesdePanel(e: Entrada): Promise<{ aprobacion: Aprobacion; enviado: boolean }> {
+  const canal = opcion(e, 'canal', ['Correo', 'WhatsApp'] as const);
+  const titulo = texto(e, 'titulo', 300);
+  const cuerpo = texto(e, 'texto', 20000);
+  const para = textoOpcional(e, 'para', 300);
+  const asunto = textoOpcional(e, 'asunto', 500);
+  const aprobacion: Aprobacion = { id: nuevoId(), titulo, canal, detalle: texto(e, 'detalle'), texto: cuerpo, estado: 'aprobada', creada: ahora(), resuelta: ahora() };
+  await almacen().agregar('aprobaciones', aprobacion);
+  await anotarActividad(`Escribiste y aprobaste: ${titulo}`);
+  let enviado = false;
+  if (canal === 'Correo' && para && ES_CORREO.test(para) && (await almacen().listar('conexiones')).length > 0) {
+    await enviarCorreo({ aprobacion_id: aprobacion.id, para, asunto: asunto ?? titulo, texto: cuerpo });
+    enviado = true;
+  } else if (canal === 'WhatsApp' && para && !faltaWhatsapp()) {
+    await enviarWhatsapp({ aprobacion_id: aprobacion.id, para, texto: cuerpo });
+    enviado = true;
+  }
+  return { aprobacion, enviado };
 }

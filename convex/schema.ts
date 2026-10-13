@@ -84,5 +84,6 @@ export default defineSchema({
     fondo: v.union(v.literal('calido'), v.literal('noche'), v.literal('aurora'), v.literal('grafito')),
     logo: v.optional(v.string()),
     sonido: v.boolean(),
+    voz: v.optional(v.string()),
   }),
 });

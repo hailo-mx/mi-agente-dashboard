@@ -2,6 +2,7 @@
 import { ImageResponse } from 'next/og';
 import { ajustesActuales } from './ajustes';
 import { sobreColor } from './formato';
+import { NOMBRE } from './marca';
 
 export async function dibujarIcono(lado: number) {
   const { nombreApp, color } = await ajustesActuales();
@@ -20,7 +21,7 @@ export async function dibujarIcono(lado: number) {
           fontWeight: 700,
         }}
       >
-        {(nombreApp.trim()[0] ?? 'M').toUpperCase()}
+        {(nombreApp.trim()[0] ?? NOMBRE[0]).toUpperCase()}
       </div>
     ),
     { width: lado, height: lado },

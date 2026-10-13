@@ -23,12 +23,12 @@ export default function Entrar() {
   };
 
   return (
-    <div className="cuarto puerta" data-fondo="calido">
-      <form className="vidrio puerta-caja" onSubmit={entrar}>
+    <div className="mt-cuarto puerta" data-fondo="calido">
+      <form className="mt-vidrio mt-puerta v2-enter" onSubmit={entrar}>
         <h1>Tu panel está protegido</h1>
-        <p className="tenue">Escribe tu clave para entrar. Es la misma que le diste a tu agente (CLAVE_AGENTE).</p>
+        <p>Escribe tu clave para entrar. Es la misma que le diste a tu agente (CLAVE_AGENTE).</p>
         <input
-          className="campo"
+          className="mt-campo"
           type="password"
           value={clave}
           onChange={(e) => setClave(e.target.value)}
@@ -37,8 +37,8 @@ export default function Entrar() {
           autoComplete="current-password"
           autoFocus
         />
-        {error && <p className="error" role="alert">{error}</p>}
-        <button className="boton principal" type="submit" disabled={enviando || !clave.trim()}>
+        {error && <p className="mt-error" role="alert">{error}</p>}
+        <button className="mt-btn" type="submit" disabled={enviando || !clave.trim()}>
           {enviando ? 'Entrando…' : 'Entrar'}
         </button>
       </form>

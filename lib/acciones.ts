@@ -1,6 +1,8 @@
 // Lo que se puede hacer con los datos. Lo usan por igual el agente (/mcp) y la pantalla (/api).
 import { randomBytes } from 'crypto';
 import { almacen } from './almacen';
+import { NOMBRE } from './marca';
+import { VOCES } from './tema';
 import { CANALES, ESTADOS, FONDOS, type Ajustes, type Aprobacion, type Canal, type Correo, type Estado, type Evento, type Rutina, type Tarea } from './tipos';
 
 /** Un dato que llegó mal. Su mensaje se le muestra tal cual a quien lo mandó. */
@@ -40,7 +42,7 @@ function booleano(e: Entrada, campo: string, porDefecto?: boolean): boolean {
   return valor;
 }
 
-function opcion<T extends string>(e: Entrada, campo: string, opciones: readonly T[]): T {
+export function opcion<T extends string>(e: Entrada, campo: string, opciones: readonly T[]): T {
   const valor = e[campo];
   if (typeof valor !== 'string' || !opciones.includes(valor as T)) throw new ErrorDeDatos(`"${campo}" debe ser uno de: ${opciones.join(', ')}.`);
   return valor as T;
@@ -239,12 +241,13 @@ export async function guardarAjustes(e: Entrada): Promise<Ajustes> {
   const logo = textoOpcional(e, 'logo', MAX_LOGO);
   if (logo && !logo.startsWith('data:image/')) throw new ErrorDeDatos('El logo debe ser una imagen.');
   const ajustes: Ajustes = compacto({
-    nombreApp: textoOpcional(e, 'nombreApp', 40) ?? 'Mi Agente',
+    nombreApp: textoOpcional(e, 'nombreApp', 40) ?? NOMBRE,
     tuNombre: textoOpcional(e, 'tuNombre', 40) ?? '',
     color,
     fondo: opcion(e, 'fondo', FONDOS),
     logo,
     sonido: booleano(e, 'sonido'),
+    voz: e.voz === undefined ? 'Sol' : opcion(e, 'voz', VOCES),
   });
   await almacen().guardarAjustes(ajustes);
   return ajustes;

@@ -4,6 +4,38 @@ Es una página web donde ves lo que hace tu agente de IA: las tareas que te anot
 
 Tu agente se conecta por **MCP** (un conector estándar) y escribe en el panel con las herramientas que vienen al final de este archivo.
 
+Se ve igual que el dashboard de muestra del mini taller: en computadora, un riel de íconos a la izquierda, la lista de la sección, el detalle al centro y tu agente a la derecha, todo sobre una ventana de cristal. En el celular es una app con pestañas abajo (Inicio, Correos, Agente, WhatsApp y Más).
+
+## Las secciones
+
+- **Inicio**: saludo con tu nombre, lo que espera tu aprobación (con Aprobar y ✕ ahí mismo), tres cifras (correos ordenados, tareas abiertas, rutinas activas) y lo último que hizo tu agente.
+- **Calendario**: la semana como en Google Calendar, con tus eventos (los guarda tu agente o se traen de tu cuenta conectada).
+- **Correos**: tu bandeja resumida; al abrir uno ves la respuesta que preparó tu agente y puedes **Enviar** o **Editar**. **Redactar** escribe un correo nuevo.
+- **WhatsApp**: una conversación por número; contestas desde la cajita de abajo.
+- **Tareas**: pendientes y hechas; se marcan con el círculo. Abajo puedes anotar una a mano.
+- **Rutinas**: lo que tu agente hace solo y a qué hora; cada una se puede pausar.
+- **Aprobaciones**: lo que tu agente quiere mandar en tu nombre, con el texto exacto. Aprobar, Editar o rechazar (✕).
+- **Conexiones**: conectar Google, Microsoft 365 y WhatsApp Business.
+- **Ajustes**: tema, color, fondo, voz, logo y sonido; el nombre de la app y el tuyo; la dirección MCP para tu agente.
+- **Tu agente** (la columna de la derecha, o la pestaña «Agente» en el celular): tu agente vive en Dots, Grok Bot o Muse; aquí solo se ve lo último que hizo. No se le escribe desde el panel.
+
+Cuando todavía no hay nada, cada sección lo dice con una línea («Tu agente todavía no ha anotado nada», «Conecta tu correo en Conexiones…»). El panel nunca inventa datos de muestra.
+
+### Contestar correos y WhatsApp desde el panel
+
+Al tocar **Enviar** en un correo o mandar un mensaje de WhatsApp, queda registrada una aprobación ya **aprobada** por ti. Si tienes una cuenta conectada para ese canal (Google/Microsoft para correo, WhatsApp Business para WhatsApp), se manda de inmediato y ves «✓ Enviado». Si no, ves «✓ Aprobado» y tu agente la manda en su siguiente revisión (la encuentra con `listar_aprobaciones` filtrando por `aprobada`).
+
+## Cambiar el nombre y el color (lección 10)
+
+Hay un solo lugar en el código: el archivo `lib/marca.ts`.
+
+```ts
+export const NOMBRE = 'Mi Agente';
+export const COLOR = '#2f6df6';
+```
+
+Con eso cambian el nombre con el que arranca la app (título, ícono y manifiesto para instalarla en el celular) y el color de acento inicial. Desde **Ajustes** también se cambian sin tocar código, y lo que elijas ahí manda sobre `lib/marca.ts`. Todo el estilo visual vive en `app/globals.css`.
+
 ## Correrlo en tu computadora
 
 Necesitas tener instalado Node.js (versión 18 o más nueva). Luego, en la carpeta del proyecto:
@@ -101,7 +133,7 @@ Son las que aparecen en `tools/list` (están definidas en `lib/herramientas.ts`)
 - `registrar_actividad` — Escribe una línea en la actividad reciente del panel.
 - `guardar_correos` — Sustituye el resumen de tu bandeja de entrada por la lista que mande.
 - `guardar_eventos` — Sustituye los eventos del calendario dentro de un rango de fechas.
-- `leer_ajustes` — Devuelve el nombre del panel y tu nombre, para que te hable por tu nombre.
+- `leer_ajustes` — Devuelve el nombre del panel, tu nombre, el color, el fondo y la voz elegida, para que te hable por tu nombre.
 - `listar_conexiones` — Dice qué cuentas tienes conectadas (Google, Microsoft 365, WhatsApp) y cuándo se sincronizaron.
 - `sincronizar_correo_y_calendario` — Trae a tu panel los últimos 20 hilos de tu bandeja y los eventos de los próximos 7 días de las cuentas conectadas.
 - `enviar_correo` — Manda un correo de verdad desde tu cuenta. Solo con el `aprobacion_id` de una aprobación que tú ya aprobaste.
@@ -146,7 +178,8 @@ Mientras la app de Google esté «en pruebas» (lo normal para uso personal), Go
 - `GET /api/tareas`, `/api/rutinas`, `/api/aprobaciones`, `/api/actividad`, `/api/correos`, `/api/eventos` — cada lista por separado.
 - `POST /api/tareas` — agregar una tarea a mano.
 - `PATCH /api/tareas/:id`, `/api/rutinas/:id`, `/api/aprobaciones/:id` — marcar hecha, encender/apagar, aprobar o rechazar.
-- `GET` y `PUT /api/ajustes` — nombre, color, fondo, logo y sonido.
+- `GET` y `PUT /api/ajustes` — nombre, color, fondo, logo, voz y sonido.
+- `POST /api/enviar` — contestar un correo o un WhatsApp desde la pantalla: deja la aprobación aprobada y, si hay cuenta conectada, lo manda (`canal`, `para`, `asunto`, `texto`, `titulo`, `detalle`).
 - `GET /api/conexiones` — el estado de tus cuentas conectadas (nunca devuelve las llaves).
 - `GET /api/conexiones/google/iniciar`, `/callback` (igual con `microsoft`) — el flujo de permiso; los usa el navegador.
 - `POST /api/conexiones/google/sincronizar`, `/desconectar` (igual con `microsoft`) y `POST /api/conexiones/sincronizar` (todas).

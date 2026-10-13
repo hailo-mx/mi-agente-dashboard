@@ -45,10 +45,11 @@ export function diaDeTarea(fecha: string): string {
   return dia.toLocaleDateString('es-MX', { day: 'numeric', month: 'long' });
 }
 
+/** Buenos días, Mariana · si no hay nombre, solo "Hola". */
 export function saludo(nombre: string): string {
+  if (!nombre.trim()) return 'Hola';
   const h = new Date().getHours();
-  const base = h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches';
-  return nombre.trim() ? `${base}, ${nombre.trim()}` : base;
+  return `${h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches'}, ${nombre.trim()}`;
 }
 
 /** Blanco o negro, lo que se lea mejor encima del color de acento. */

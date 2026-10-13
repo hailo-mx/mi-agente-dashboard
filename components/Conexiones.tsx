@@ -14,8 +14,8 @@ const NOMBRE: Record<Proveedor, string> = { google: 'Google (Gmail y Google Cale
 
 function Tarjeta({ titulo, chip, children }: { titulo: string; chip: ReactNode; children: ReactNode }) {
   return (
-    <section className="grupo conexion">
-      <div className="conexion-cabeza">
+    <section className="mt-tarjeta">
+      <div className="mt-tarjeta-cabeza">
         <h2>{titulo}</h2>
         {chip}
       </div>
@@ -24,7 +24,7 @@ function Tarjeta({ titulo, chip, children }: { titulo: string; chip: ReactNode; 
   );
 }
 
-const Chip = ({ on, texto }: { on: boolean; texto: string }) => <span className={`chip ${on ? 'estado-hecha' : ''}`}>{texto}</span>;
+const Chip = ({ on, texto }: { on: boolean; texto: string }) => <span className={`mt-chip-estado ${on ? 'ok' : ''}`}>{texto}</span>;
 
 export default function Conexiones({ avisar }: { avisar: (texto: string) => void }) {
   const [estado, setEstado] = useState<Estado | null>(null);
@@ -66,32 +66,32 @@ export default function Conexiones({ avisar }: { avisar: (texto: string) => void
     window.location.href = `/api/conexiones/${p}/iniciar`;
   };
 
-  if (!estado) return <div className="cuerpo una"><p className="vacio">Cargando tus conexiones…</p></div>;
+  if (!estado) return <p className="mt-vacio">Cargando tus conexiones…</p>;
 
   const cuenta = (p: Proveedor, c: Cuenta, pasos: ReactNode) => (
     <Tarjeta key={p} titulo={NOMBRE[p]} chip={<Chip on={c.conectada} texto={c.conectada ? 'Conectado' : 'Sin conectar'} />}>
       {c.conectada ? (
         <>
           <p>Conectado como <strong>{c.correo}</strong></p>
-          <p className="tenue chico">Última sincronización: {c.ultimaSync ? cuando(c.ultimaSync) : 'todavía no'}</p>
+          <p className="mt-ayuda">Última sincronización: {c.ultimaSync ? cuando(c.ultimaSync) : 'todavía no'}</p>
         </>
       ) : (
-        <p className="tenue chico">Al conectar, tu panel (y tu agente a través de él) podrá leer tu bandeja de entrada y tu calendario, y mandar correos y eventos solo cuando tú los apruebes.</p>
+        <p className="mt-ayuda">Al conectar, tu panel (y tu agente a través de él) podrá leer tu bandeja de entrada y tu calendario, y mandar correos y eventos solo cuando tú los apruebes.</p>
       )}
-      <div className="botones">
+      <div className="mt-botones">
         {c.conectada ? (
           <>
-            <button type="button" className="boton principal" disabled={Boolean(ocupado)} onClick={() => pedir(`/api/conexiones/${p}/sincronizar`)}>
+            <button type="button" className="mt-btn" disabled={Boolean(ocupado)} onClick={() => pedir(`/api/conexiones/${p}/sincronizar`)}>
               {ocupado === `/api/conexiones/${p}/sincronizar` ? 'Sincronizando…' : 'Sincronizar ahora'}
             </button>
-            <button type="button" className="boton peligro" disabled={Boolean(ocupado)} onClick={() => pedir(`/api/conexiones/${p}/desconectar`)}>Desconectar</button>
+            <button type="button" className="mt-btn-ghost peligro" disabled={Boolean(ocupado)} onClick={() => pedir(`/api/conexiones/${p}/desconectar`)}>Desconectar</button>
           </>
         ) : (
-          <button type="button" className="boton principal" onClick={() => conectar(p, c)}>Conectar</button>
+          <button type="button" className="mt-btn" onClick={() => conectar(p, c)}>Conectar</button>
         )}
       </div>
-      {!c.configurado && <p className="tenue chico">Falta configurar <code>{c.falta}</code> en las variables de entorno.</p>}
-      <details className="pasos">
+      {!c.configurado && <p className="mt-ayuda">Falta configurar <code>{c.falta}</code> en las variables de entorno.</p>}
+      <details className="mt-pasos">
         <summary>¿Cómo consigo las llaves?</summary>
         {pasos}
       </details>
@@ -100,7 +100,10 @@ export default function Conexiones({ avisar }: { avisar: (texto: string) => void
 
   const w = estado.whatsapp;
   return (
-    <div className="cuerpo una conexiones">
+    <div className="mt-detalle">
+      <p className="mt-titulo" style={{ padding: 0 }}>Tus cuentas</p>
+      <p className="mt-meta" style={{ padding: 0, fontSize: 13 }}>Conecta tu correo, tu calendario y WhatsApp. Tu agente solo manda cosas con tu aprobación.</p>
+      <div className="mt-tarjetas">
       {cuenta(
         'google',
         estado.google,
@@ -130,19 +133,19 @@ export default function Conexiones({ avisar }: { avisar: (texto: string) => void
         {w.configurado ? (
           <>
             <p>Número de WhatsApp Business: <strong>{w.numero ?? '(Meta no contestó; revisa WHATSAPP_TOKEN)'}</strong></p>
-            <p className="tenue chico">
+            <p className="mt-ayuda">
               Mensajes recibidos: {w.mensajesRecibidos}
               {w.ultimoMensaje && ` · último: ${cuando(w.ultimoMensaje)}`}
             </p>
           </>
         ) : (
-          <p className="tenue chico">Falta configurar <code>{w.falta}</code> en las variables de entorno.</p>
+          <p className="mt-ayuda">Falta configurar <code>{w.falta}</code> en las variables de entorno.</p>
         )}
-        <p className="tenue chico">
+        <p className="mt-ayuda">
           Tu WhatsApp personal (el de tu teléfono) no se puede conectar aquí: WhatsApp no lo permite. Lo que se conecta es un <strong>número de WhatsApp Business</strong> a través de Meta, que puede ser un número nuevo. Con él, el panel recibe
           los mensajes que le lleguen y tu agente puede contestar (siempre con tu aprobación). Tu agente también puede tener su propio conector de WhatsApp; si ya lo usa, este paso es opcional.
         </p>
-        <details className="pasos">
+        <details className="mt-pasos">
           <summary>¿Cómo consigo las llaves?</summary>
           <ol>
             <li>Entra a <code>developers.facebook.com</code>, crea una cuenta de desarrollador y una app de tipo <strong>Business</strong>. Agrégale el producto <strong>WhatsApp</strong>.</li>
@@ -155,6 +158,7 @@ export default function Conexiones({ avisar }: { avisar: (texto: string) => void
           </ol>
         </details>
       </Tarjeta>
+      </div>
     </div>
   );
 }
