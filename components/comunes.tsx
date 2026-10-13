@@ -2,18 +2,17 @@
 import { useEffect, type ReactNode } from 'react';
 
 /* Las secciones, en el orden del riel. */
-export const NAV = ['Inicio', 'Calendario', 'Correos', 'WhatsApp', 'Tareas', 'Rutinas', 'Aprobaciones', 'Conexiones', 'Ajustes'] as const;
+export const NAV = ['Inicio', 'Calendario', 'Correos', 'Tareas', 'Rutinas', 'Aprobaciones', 'Conexiones', 'Ajustes'] as const;
 export type Seccion = (typeof NAV)[number];
 export type Vista = Seccion | 'Más';
-/* En el teléfono: cinco pestañas abajo; "Más" guarda el resto. */
-export const PESTANAS = ['Inicio', 'Correos', 'Agente', 'WhatsApp', 'Más'] as const;
+/* En el teléfono: cuatro pestañas abajo; "Más" guarda el resto. */
+export const PESTANAS = ['Inicio', 'Correos', 'Agente', 'Más'] as const;
 export const EN_MAS: Seccion[] = ['Calendario', 'Tareas', 'Rutinas', 'Aprobaciones', 'Conexiones', 'Ajustes'];
 
 const ICONOS: Record<string, string> = {
   Inicio: 'M4 11l8-7 8 7v8a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1z',
   Calendario: 'M5 6h14a1 1 0 011 1v11a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1zm0 4h14M9 4v4m6-4v4',
   Correos: 'M4 7l8 6 8-6M5 6h14a1 1 0 011 1v10a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1z',
-  WhatsApp: 'M21 12a8 8 0 01-11.8 7L4 20l1.1-4.6A8 8 0 1121 12z',
   Tareas: 'M5 12l4 4 10-10',
   Rutinas: 'M12 7v5l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z',
   Aprobaciones: 'M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3zm-3 9l2 2 4-4',

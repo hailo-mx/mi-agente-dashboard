@@ -464,7 +464,7 @@ textarea.mt-campo.sin-linea { border-bottom: 0; }
   .mt-tabs {
     display: grid;
     flex: none;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     padding: 8px calc(8px + var(--seguro-der)) calc(8px + var(--seguro-abajo)) calc(8px + var(--seguro-izq));
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(18, 17, 20, 0.72);

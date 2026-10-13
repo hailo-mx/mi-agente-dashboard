@@ -98,11 +98,10 @@ export default function Conexiones({ avisar }: { avisar: (texto: string) => void
     </Tarjeta>
   );
 
-  const w = estado.whatsapp;
   return (
     <div className="mt-detalle">
       <p className="mt-titulo" style={{ padding: 0 }}>Tus cuentas</p>
-      <p className="mt-meta" style={{ padding: 0, fontSize: 13 }}>Conecta tu correo, tu calendario y WhatsApp. Tu agente solo manda cosas con tu aprobación.</p>
+      <p className="mt-meta" style={{ padding: 0, fontSize: 13 }}>Conecta tu correo y tu calendario. Tu agente solo manda cosas con tu aprobación.</p>
       <div className="mt-tarjetas">
       {cuenta(
         'google',
@@ -129,35 +128,6 @@ export default function Conexiones({ avisar }: { avisar: (texto: string) => void
           <li>Ponlos en Vercel (Settings → Environment Variables) junto con <code>APP_URL</code> = <code>{origen}</code>, vuelve a desplegar y toca <strong>Conectar</strong>.</li>
         </ol>,
       )}
-      <Tarjeta titulo="WhatsApp" chip={<Chip on={w.configurado} texto={w.configurado ? 'Configurado' : 'Sin configurar'} />}>
-        {w.configurado ? (
-          <>
-            <p>Número de WhatsApp Business: <strong>{w.numero ?? '(Meta no contestó; revisa WHATSAPP_TOKEN)'}</strong></p>
-            <p className="mt-ayuda">
-              Mensajes recibidos: {w.mensajesRecibidos}
-              {w.ultimoMensaje && ` · último: ${cuando(w.ultimoMensaje)}`}
-            </p>
-          </>
-        ) : (
-          <p className="mt-ayuda">Falta configurar <code>{w.falta}</code> en las variables de entorno.</p>
-        )}
-        <p className="mt-ayuda">
-          Tu WhatsApp personal (el de tu teléfono) no se puede conectar aquí: WhatsApp no lo permite. Lo que se conecta es un <strong>número de WhatsApp Business</strong> a través de Meta, que puede ser un número nuevo. Con él, el panel recibe
-          los mensajes que le lleguen y tu agente puede contestar (siempre con tu aprobación). Tu agente también puede tener su propio conector de WhatsApp; si ya lo usa, este paso es opcional.
-        </p>
-        <details className="mt-pasos">
-          <summary>¿Cómo consigo las llaves?</summary>
-          <ol>
-            <li>Entra a <code>developers.facebook.com</code>, crea una cuenta de desarrollador y una app de tipo <strong>Business</strong>. Agrégale el producto <strong>WhatsApp</strong>.</li>
-            <li>En «WhatsApp → API Setup» verás un número de prueba (o agrega el tuyo de Business). Copia el <strong>Phone number ID</strong>: es tu <code>WHATSAPP_PHONE_ID</code>.</li>
-            <li>Genera un token permanente: en «Business Settings → System users» crea un usuario de sistema, dale acceso a la app y genera un token con los permisos <code>whatsapp_business_messaging</code> y <code>whatsapp_business_management</code>. Es tu <code>WHATSAPP_TOKEN</code>.</li>
-            <li>Inventa una palabra secreta cualquiera: es tu <code>WHATSAPP_VERIFY_TOKEN</code>.</li>
-            <li>Pon las tres en Vercel (Settings → Environment Variables) y vuelve a desplegar.</li>
-            <li>En «WhatsApp → Configuration → Webhook» pega la URL <code>{origen}/api/conexiones/whatsapp/webhook</code> y tu palabra secreta; dale «Verify and save» y suscríbete al campo <strong>messages</strong>.</li>
-            <li>En modo de prueba solo puedes escribirte con números que agregues como «recipients» en API Setup. Para cualquier número, Meta te pide verificar tu negocio.</li>
-          </ol>
-        </details>
-      </Tarjeta>
       </div>
     </div>
   );

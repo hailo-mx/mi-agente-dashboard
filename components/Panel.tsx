@@ -5,7 +5,7 @@ import { COLOR_FONDO, NOMBRE_AGENTE, type Ajustes as TipoAjustes, type Datos } f
 import { cuando, saludo } from '@/lib/formato';
 import { Avatar, EN_MAS, Fila, Icono, NAV, PESTANAS, Vacio, usarClics, type Seccion, type Vista } from './comunes';
 import {
-  Agente, Calendario, Chat, Correo, DetalleAprobacion, DetalleRutina, DIA_TEXTO, Redactar, Tareas, conversaciones, diasDe, direccionDe, horaTexto, lunesDe, nombreDe, respuestasA, type Envio, type Mandar,
+  Agente, Calendario, Correo, DetalleAprobacion, DetalleRutina, DIA_TEXTO, Redactar, Tareas, diasDe, direccionDe, horaTexto, lunesDe, nombreDe, type Envio, type Mandar,
 } from './Vistas';
 import Ajustes from './Ajustes';
 import Conexiones from './Conexiones';
@@ -148,11 +148,9 @@ export default function Panel({ ajustesIniciales, vistaInicial = 'Inicio' }: { a
 
   const d = datos;
   const pendientes = d ? d.aprobaciones.filter((a) => a.estado === 'pendiente').sort((a, b) => b.creada.localeCompare(a.creada)) : [];
-  const chats = d ? conversaciones(d.whatsapp, d.aprobaciones) : [];
   const badges: Partial<Record<string, number>> = d
     ? {
         Correos: d.correos.filter((c) => c.necesitaRespuesta).length,
-        WhatsApp: chats.filter((c) => !c.respondida).length,
         Tareas: d.tareas.filter((t) => !t.hecha).length,
         Aprobaciones: pendientes.length,
       }
@@ -177,7 +175,7 @@ export default function Panel({ ajustesIniciales, vistaInicial = 'Inicio' }: { a
   if (!d) {
     centro = !falla && <Vacio>Cargando tu panel…</Vacio>;
   } else if (vista === 'Inicio') {
-    lista = (['Aprobaciones', 'Correos', 'WhatsApp', 'Tareas', 'Calendario', 'Rutinas'] as Seccion[]).map(atajo);
+    lista = (['Aprobaciones', 'Correos', 'Tareas', 'Calendario', 'Rutinas'] as Seccion[]).map(atajo);
     const actividad = [...d.actividad].sort((a, b) => b.cuando.localeCompare(a.cuando)).slice(0, 4);
     const kpis = [
       { k: 'Correos ordenados', v: d.correos.length },
@@ -285,27 +283,6 @@ export default function Panel({ ajustesIniciales, vistaInicial = 'Inicio' }: { a
     ) : (
       <Vacio>Cuando tu agente revise tu correo, aquí verás cada mensaje y la respuesta que te prepare.</Vacio>
     );
-  } else if (vista === 'WhatsApp') {
-    const actual = chats.find((c) => c.de === sel.WhatsApp) ?? chats[0];
-    lista = chats.length === 0 ? (
-      <Vacio>Conecta WhatsApp en Conexiones: los mensajes que lleguen a tu número de WhatsApp Business aparecen aquí.</Vacio>
-    ) : (
-      chats.map((c) => {
-        const ultimo = c.mensajes[c.mensajes.length - 1];
-        return <Fila key={c.de} a={c.nombre} b={ultimo.texto} on={c.de === actual?.de} punto={!c.respondida} onClick={() => elegir(c.de)} c={<span className="mt-fila-h">{cuando(c.ultimo)}</span>} />;
-      })
-    );
-    centro = actual ? (
-      <Chat
-        key={actual.de}
-        c={actual}
-        enviadas={respuestasA(d.aprobaciones, actual.de)}
-        ocupado={ocupado}
-        onEnviar={(texto) => enviar(actual.de, { canal: 'WhatsApp', para: actual.de, texto, titulo: `Responder a ${actual.nombre}`, detalle: `WhatsApp a ${actual.nombre} (+${actual.de})` })}
-      />
-    ) : (
-      <Vacio>Aquí verás cada conversación y podrás contestar; tu respuesta sale con tu aprobación.</Vacio>
-    );
   } else if (vista === 'Tareas') {
     const grupos = { Pendientes: d.tareas.filter((t) => !t.hecha).length, Hechas: d.tareas.filter((t) => t.hecha).length };
     lista = (Object.keys(grupos) as (keyof typeof grupos)[]).map((g) => (
@@ -352,7 +329,7 @@ export default function Panel({ ajustesIniciales, vistaInicial = 'Inicio' }: { a
   const modo = ({ Inicio: 'centro', Calendario: 'centro', Ajustes: 'centro', Conexiones: 'centro', Tareas: 'ambos', Más: 'maestro' } as Record<string, string>)[vista] ?? 'maestro';
   const verLista = !chatMovil && (modo === 'ambos' || (modo === 'maestro' && !abierto));
   const verCentro = !chatMovil && (modo !== 'maestro' || abierto);
-  const pestana = chatMovil ? 'Agente' : ['Inicio', 'Correos', 'WhatsApp'].includes(vista) ? vista : 'Más';
+  const pestana = chatMovil ? 'Agente' : ['Inicio', 'Correos'].includes(vista) ? vista : 'Más';
   const sonido = (
     <button type="button" className="mt-sonido" aria-label={ajustes.sonido ? 'Apagar sonido' : 'Encender sonido'} title={ajustes.sonido ? 'Apagar sonido' : 'Encender sonido'} onClick={() => cambiarAjustes({ sonido: !ajustes.sonido })}>
       <Icono nombre={ajustes.sonido ? 'SonidoOn' : 'SonidoOff'} />
