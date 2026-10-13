@@ -383,6 +383,10 @@ export default function Panel({ ajustesIniciales, vistaInicial = 'Inicio' }: { a
               {(badges[v] ?? 0) > 0 && <b />}
             </button>
           ))}
+          {/* tablet: tu agente se abre encima de las dos columnas */}
+          <button type="button" className={`solo-tablet ${chatMovil ? 'on' : ''}`} aria-label="Tu agente" title="Tu agente" aria-pressed={chatMovil} onClick={() => setChatMovil((v) => !v)}>
+            <Icono nombre="Agente" />
+          </button>
         </nav>
 
         <div className="mt-vidrio mt-app">
@@ -413,7 +417,8 @@ export default function Panel({ ajustesIniciales, vistaInicial = 'Inicio' }: { a
             </div>
 
             {/* tu agente */}
-            <div className={`mt-chat ${chatMovil ? '' : 'oculto-movil'}`}>
+            <div className={`mt-chat ${chatMovil ? 'abierto' : 'oculto-movil'}`}>
+              <button type="button" className="mt-x solo-tablet" aria-label="Cerrar" title="Cerrar" onClick={() => setChatMovil(false)}>✕</button>
               <Agente actividad={d?.actividad ?? []} nombre={ajustes.tuNombre} ir={() => ir('Ajustes')} />
             </div>
           </div>

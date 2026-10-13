@@ -1,10 +1,11 @@
-// El ícono de la app: un cuadro redondeado del color de acento con la inicial del nombre.
+// El ícono de la app: un cuadro del color de acento con la inicial del nombre.
+// La versión «maskable» (Android la recorta en círculo) lleva la letra más chica, dentro de la zona segura.
 import { ImageResponse } from 'next/og';
 import { ajustesActuales } from './ajustes';
 import { sobreColor } from './formato';
 import { NOMBRE } from './marca';
 
-export async function dibujarIcono(lado: number) {
+export async function dibujarIcono(lado: number, maskable = false) {
   const { nombreApp, color } = await ajustesActuales();
   return new ImageResponse(
     (
@@ -17,7 +18,7 @@ export async function dibujarIcono(lado: number) {
           justifyContent: 'center',
           background: color,
           color: sobreColor(color),
-          fontSize: lado * 0.56,
+          fontSize: lado * (maskable ? 0.42 : 0.56),
           fontWeight: 700,
         }}
       >

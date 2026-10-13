@@ -43,7 +43,7 @@ img { display: block; }
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 48px;
+  padding: 20px;
   overflow: hidden;
   transition: background 0.5s;
 }
@@ -75,8 +75,8 @@ img { display: block; }
     linear-gradient(180deg, #18181b, #09090b);
 }
 
-/* el marco: riel a la izquierda y la ventana de cristal */
-.mt-marco { position: relative; width: 100%; max-width: 1184px; padding-left: 68px; }
+/* el marco: riel a la izquierda y la ventana de cristal, que llena toda la pantalla */
+.mt-marco { position: relative; width: 100%; height: 100%; padding-left: 68px; }
 
 /* ── cristal ── */
 .mt-vidrio {
@@ -88,17 +88,19 @@ img { display: block; }
   box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 .mt-app {
+  position: relative;
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr) 330px;
+  grid-template-columns: clamp(230px, 20vw, 300px) minmax(0, 1fr) clamp(280px, 22vw, 360px);
   grid-template-rows: auto minmax(0, 1fr);
-  gap: 0 16px;
-  min-height: 520px;
-  max-height: min(860px, calc(100vh - 96px));
-  padding: 16px;
+  gap: 0 20px;
+  height: 100%;
+  padding: 20px;
   text-align: left;
 }
 .mt-app-cuerpo { display: contents; }
 .mt-bandas { grid-column: 1 / -1; }
+/* las columnas siempre van en el segundo renglón, haya o no bandas arriba */
+.mt-panel-izq, .mt-centro, .mt-chat { grid-row: 2; }
 .mt-banda { margin-bottom: 12px; padding: 10px 14px; border-radius: 14px; background: rgba(255, 255, 255, 0.08); font-size: 13.5px; }
 .mt-banda.alerta { background: rgba(245, 158, 11, 0.18); color: #fde9c3; }
 
@@ -388,11 +390,38 @@ textarea.mt-campo.sin-linea { border-bottom: 0; }
 .mt-puerta h1 { font-size: 22px; font-weight: 600; }
 .mt-puerta p { font-size: 13.5px; color: rgba(255, 255, 255, 0.5); }
 
-/* pestañas: solo en el teléfono */
+/* pestañas: solo en el teléfono; el botón del agente y su ✕: solo en tablet */
 .mt-tabs { display: none; }
+.mt-riel .solo-tablet, .mt-x.solo-tablet { display: none; }
 
-/* ── celular: el dashboard es una app de pantalla completa ── */
-@media (max-width: 1023px) {
+/* ── tablet (iPad): riel de íconos y dos columnas; tu agente se abre con el botón del riel ── */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .mt-cuarto { padding: 12px; }
+  .mt-marco { padding-left: 66px; }
+  .mt-riel { gap: 4px; padding: 5px; }
+  .mt-riel button { width: 44px; height: 44px; }
+  .mt-riel .solo-tablet { display: grid; margin-top: 4px; border-top: 1px solid rgba(255, 255, 255, 0.12); border-radius: 0 0 999px 999px; padding-top: 4px; height: 48px; }
+  .mt-vidrio.mt-app { border-radius: 24px; }
+  .mt-app { grid-template-columns: clamp(220px, 28vw, 280px) minmax(0, 1fr); gap: 0 16px; padding: 16px; }
+  .mt-item, .mt-fila { padding: 12px 14px; }
+  .mt-chat { display: none; }
+  .mt-chat.abierto {
+    display: flex;
+    position: absolute;
+    z-index: 5;
+    top: 16px;
+    right: 16px;
+    bottom: 16px;
+    width: min(360px, calc(100% - 32px));
+    background: rgba(22, 21, 24, 0.96);
+    box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.8);
+  }
+  .mt-chat .solo-tablet { display: grid; position: absolute; top: 14px; right: 14px; }
+  .mt-personalizar { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ── celular: el dashboard es una app de pantalla completa, de orilla a orilla ── */
+@media (max-width: 767px) {
   .mt-cuarto { padding: 0; }
   .mt-cuarto.puerta { padding: 20px; }
   .mt-marco { max-width: none; max-height: none; padding-left: 0; }
@@ -402,7 +431,7 @@ textarea.mt-campo.sin-linea { border-bottom: 0; }
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 100dvh;
+    height: 100%;
     padding: 0;
     overflow: hidden;
   }
@@ -430,7 +459,7 @@ textarea.mt-campo.sin-linea { border-bottom: 0; }
   .mt-tabs button b { position: absolute; top: 4px; left: 58%; width: 8px; height: 8px; border-radius: 999px; background: var(--azul); }
   .oculto-movil { display: none !important; }
 }
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
   .mt-barra-arriba { display: none; }
   .solo-movil { display: none !important; }
 }

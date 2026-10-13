@@ -4,7 +4,9 @@ Es una página web donde ves lo que hace tu agente de IA: las tareas que te anot
 
 Tu agente se conecta por **MCP** (un conector estándar) y escribe en el panel con las herramientas que vienen al final de este archivo.
 
-Se ve igual que el dashboard de muestra del mini taller: en computadora, un riel de íconos a la izquierda, la lista de la sección, el detalle al centro y tu agente a la derecha, todo sobre una ventana de cristal. En el celular es una app con pestañas abajo (Inicio, Correos, Agente, WhatsApp y Más).
+Se ve igual que el dashboard de muestra del mini taller y ocupa toda la pantalla: en computadora, un riel de íconos a la izquierda, la lista de la sección, el detalle al centro y tu agente a la derecha, todo sobre una ventana de cristal. En iPad son dos columnas y tu agente se abre con el último botón del riel. En el celular es una app con pestañas abajo (Inicio, Correos, Agente, WhatsApp y Más).
+
+Se puede **instalar como app** (PWA): en iPhone/iPad, Safari → Compartir → «Agregar a pantalla de inicio»; en Android y en Chrome de escritorio, el botón «Instalar» de la barra de direcciones. Se abre sin barra del navegador, con el nombre y el color que pongas en Ajustes.
 
 ## Las secciones
 
