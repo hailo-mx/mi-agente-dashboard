@@ -119,6 +119,15 @@ export const HERRAMIENTAS: Herramienta[] = [
     ejecutar: (a) => acciones.registrarActividad(a),
   },
   {
+    name: 'listar_actividad',
+    description: 'Devuelve los últimos movimientos de la actividad reciente del panel (lo que anotaste tú y lo que hizo la persona), del más reciente al más viejo.',
+    inputSchema: {
+      type: 'object',
+      properties: { limite: { type: 'number', description: 'Opcional. Cuántos devolver, entre 1 y 100. Por defecto: 20.' } },
+    },
+    ejecutar: (a) => acciones.listarActividad(a),
+  },
+  {
     name: 'guardar_correos',
     description: 'Sustituye el resumen de la bandeja de entrada del panel por la lista que mandes. Manda la lista completa cada vez (los anteriores se borran).',
     inputSchema: {
@@ -254,5 +263,14 @@ export const HERRAMIENTAS: Herramienta[] = [
       required: ['para', 'aprobacion_id'],
     },
     ejecutar: (a) => conexiones.enviarWhatsapp(a),
+  },
+  {
+    name: 'listar_whatsapp',
+    description: 'Devuelve los últimos mensajes de WhatsApp que llegaron al número de WhatsApp Business del panel (quién lo mandó, su nombre, el texto y cuándo), del más reciente al más viejo.',
+    inputSchema: {
+      type: 'object',
+      properties: { limite: { type: 'number', description: 'Opcional. Cuántos devolver, entre 1 y 100. Por defecto: 20.' } },
+    },
+    ejecutar: (a) => acciones.listarWhatsapp(a),
   },
 ];

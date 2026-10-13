@@ -2,7 +2,7 @@
 import { randomBytes } from 'crypto';
 import { almacen } from './almacen';
 import { NOMBRE } from './marca';
-import { AGENTES, CANALES, ESTADOS, FONDOS, VOCES_AGENTE, type Agente, type Ajustes, type Aprobacion, type Canal, type Correo, type Estado, type Evento, type Rutina, type Tarea } from './tipos';
+import { AGENTES, CANALES, ESTADOS, FONDOS, VOCES_AGENTE, type Actividad, type Agente, type Ajustes, type Aprobacion, type Canal, type Correo, type Estado, type Evento, type Rutina, type Tarea, type Whatsapp } from './tipos';
 
 /** Un dato que llegó mal. Su mensaje se le muestra tal cual a quien lo mandó. */
 export class ErrorDeDatos extends Error {}
@@ -87,6 +87,26 @@ export async function anotarActividad(textoLibre: string) {
 
 export async function registrarActividad(e: Entrada) {
   return anotarActividad(texto(e, 'texto', 500));
+}
+
+/** "limite": cuántos elementos devolver, entre 1 y 100. Por defecto 20. */
+function limite(e: Entrada): number {
+  const valor = e.limite;
+  if (valor === undefined || valor === null) return 20;
+  if (typeof valor !== 'number' || !Number.isInteger(valor) || valor < 1 || valor > 100) throw new ErrorDeDatos('"limite" debe ser un número entero entre 1 y 100.');
+  return valor;
+}
+
+/** Los últimos movimientos, del más reciente al más viejo. */
+export async function listarActividad(e: Entrada): Promise<Actividad[]> {
+  const todo = await almacen().listar('actividad');
+  return [...todo].sort((a, b) => b.cuando.localeCompare(a.cuando)).slice(0, limite(e));
+}
+
+/** Los últimos mensajes de WhatsApp recibidos, del más reciente al más viejo. */
+export async function listarWhatsapp(e: Entrada): Promise<Whatsapp[]> {
+  const todo = await almacen().listar('whatsapp');
+  return [...todo].sort((a, b) => b.recibido.localeCompare(a.recibido)).slice(0, limite(e));
 }
 
 // ── tareas ──

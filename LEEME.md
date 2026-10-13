@@ -174,6 +174,7 @@ Son las que aparecen en `tools/list` (están definidas en `lib/herramientas.ts`)
 - `listar_aprobaciones` — Devuelve las aprobaciones (filtrables por estado) con el texto final, corregido por ti si lo cambiaste.
 - `marcar_aprobacion_hecha` — Avisa que ya hizo lo que aprobaste.
 - `registrar_actividad` — Escribe una línea en la actividad reciente del panel.
+- `listar_actividad` — Devuelve los últimos movimientos de la actividad reciente, del más reciente al más viejo (`limite` opcional, 1 a 100, por defecto 20).
 - `guardar_correos` — Sustituye el resumen de tu bandeja de entrada por la lista que mande.
 - `guardar_eventos` — Sustituye los eventos del calendario dentro de un rango de fechas.
 - `leer_ajustes` — Devuelve el nombre del panel, tu nombre, el color, el fondo, la voz elegida, en qué agente vives y qué voces tiene ese agente (`vocesDisponibles`), para que te hable por tu nombre.
@@ -183,8 +184,9 @@ Son las que aparecen en `tools/list` (están definidas en `lib/herramientas.ts`)
 - `enviar_correo` — Manda un correo de verdad desde tu cuenta. Solo con el `aprobacion_id` de una aprobación que tú ya aprobaste.
 - `crear_evento` — Crea un evento de verdad en tu calendario. Solo con una aprobación aprobada.
 - `enviar_whatsapp` — Manda un WhatsApp desde tu número de WhatsApp Business. Solo con una aprobación aprobada.
+- `listar_whatsapp` — Devuelve los últimos mensajes de WhatsApp que llegaron a tu número de WhatsApp Business, del más reciente al más viejo (`limite` opcional, 1 a 100, por defecto 20).
 
-Las tres últimas pasan la aprobación a «hecha» al terminar: cada aprobación sirve una sola vez.
+`enviar_correo`, `crear_evento` y `enviar_whatsapp` pasan la aprobación a «hecha» al terminar: cada aprobación sirve una sola vez.
 
 ## Conexiones: tu correo, tu calendario y WhatsApp de verdad
 
@@ -219,7 +221,7 @@ Mientras la app de Google esté «en pruebas» (lo normal para uso personal), Go
 ## Rutas de la página (por si las necesitas)
 
 - `GET /api/datos` — todo lo que muestra la pantalla.
-- `GET /api/tareas`, `/api/rutinas`, `/api/aprobaciones`, `/api/actividad`, `/api/correos`, `/api/eventos` — cada lista por separado.
+- `GET /api/tareas`, `/api/rutinas`, `/api/aprobaciones`, `/api/actividad`, `/api/correos`, `/api/eventos`, `/api/whatsapp` — cada lista por separado.
 - `POST /api/tareas` — agregar una tarea a mano.
 - `PATCH /api/tareas/:id`, `/api/rutinas/:id`, `/api/aprobaciones/:id` — marcar hecha, encender/apagar, aprobar o rechazar.
 - `GET` y `PUT /api/ajustes` — nombre, color, fondo, voz, sonido y agente.
